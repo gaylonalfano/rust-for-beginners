@@ -2,10 +2,15 @@ use std::io;
 use std::cmp::Ordering;
 use rand::Rng;
 
+const LOWER_BOUND: u32 = 1;
+const UPPER_BOUND: u32 = 11;
+
+
 fn main() {
     println!("Guess the number between 1 and 10!");
 
-    let secret_number = rand::thread_rng().gen_range(1..11);
+    // let secret_number = rand::thread_rng().gen_range(1..11);
+    let secret_number = rand::thread_rng().gen_range(LOWER_BOUND..UPPER_BOUND);
     
     // println!("The secret number is: {}", secret_number);
 
