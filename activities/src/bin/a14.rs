@@ -40,7 +40,7 @@ fn main() {
         Person {
             age: 8,
             name: "Aaron".to_owned(),
-            favorite_color: String::from("black"), // Transforming string slice into owned String
+            favorite_color: String::from("black"), // Transforming string slice (&str) into owned String
         },
         Person {
             age: 10,
