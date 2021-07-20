@@ -54,16 +54,20 @@ fn main() {
         // `price`, and binds it to `p` whenever the price is `50.0.` `p` can then be used to print the price.
         // You can also use `price` instead of `p, but it might become ambiguous depending on how
         // your match arm is structured.
-        Ticket {price: p @ 50.0, event} => println!("(match arm 2) event @ {} = {}", p, event),
+        Ticket {
+            price: p @ 50.0,
+            event,
+        } => println!("(match arm 2) event @ {} = {}", p, event),
         // Ticket {price: banana @ 50.0, event} => println!("(match arm 2) event @ {} = {}", banana, event),
 
         // In this match arm, we are saying that we want to get the `event` information and the
         // `price` information from the structure. But we only want to get these pieces of
         // information when the price is 50.0. This is called a `match guard`.
-        Ticket {price, event} if price == 50.0 => println!("(match arm 3) event @ {} = {}", price, event),
+        Ticket { price, event } if price == 50.0 => {
+            println!("(match arm 3) event @ {} = {}", price, event)
+        }
 
         // Match on Ticket price only
-        Ticket {price, ..} => println!("price = {:?}", price), // Works
+        Ticket { price, .. } => println!("price = {:?}", price), // Works
     }
-
 }
