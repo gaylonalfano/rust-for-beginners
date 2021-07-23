@@ -110,79 +110,97 @@ struct Customer {
     age: i32,
 }
 
-// === MY ATTEMPT
+// === MY ATTEMPT - Result<(), String>
 // * Use a function to determine if a customer can make a restricted purchase
-fn is_restricted_purchase(customer: &Customer) -> Result<bool, String> {
+// Q: Do I return bool or unit type ()?
+// A: Using the unit type is best when you just want to know if something is
+// successful, and don't care about a successful value!
+fn is_restricted_purchase(customer: &Customer) -> Result<(), String> {
     // Q: Need match or just simple if/else?
     // A: A simple if seems better for this scenario
-    // Q: Do I return bool or unit type ()?
     if customer.age >= 21 {
         // * Return a result from the function
-        // NOTE Have to 'return' or else it errors
-        println!("Unrestricted purchase: age = {:?}", customer.age);
-        // Ok(false); // Error
-        // return Result::Ok(false); // Works
-        return Ok(false); // Works
+        println!(
+            "Unrestricted purchase for {:?} with age = {:?}",
+            customer.name, customer.age
+        );
+        // NOTE Need to remove ';' or else it errors
+        // Ok(()); // Error - Need to remove ';'
+        // return Result::Ok(()); // Works
+        // return Ok(()); // Works
+        Ok(()) // Works
     } else {
-        // Err("Restricted purchase. Age too low.".to_owned()); // Error
+        // Err("Restricted purchase. Age too low.".to_owned()); // Error - Need to remove ';'
         // return Result::Err("Restricted purchase. Age too low.".to_owned()); // Works
-        return Err("Restricted purchase. Age too low".to_owned()); // Works
+        // return Err("Restricted purchase. Age too low".to_owned()); // Works
+        Err("Restricted purchase. Age too low".to_owned()) // Works
     }
 }
-
-fn print_customer_name_if_not_restricted(is_restricted: bool, customer: &Customer) {
-    match is_restricted {
-        false => println!("Unrestricted customer: {:?}", customer.name),
-        _ => println!("RESTRICTED! Can't print name!"),
-    }
-}
-
-// == Result<(), String> variant -- Error
-// fn is_restricted_purchase(age: i32) -> Result<(), String> {
-//     // Q: Need match or just simple if/else?
-//     // match age {
-//     //     (age < 21) => Err("Restricted purchase. Customer age is: {:?}", age),
-//     //     _ => Ok(true),
-//     // } // ERROR
-//     // Q: Do I return bool or unit type ()?
-//     if age >= 21 {
-//         println!("Unrestricted purchase: age = {:?}", age);
-//         return Result::Ok(());
-//     } else {
-// * The Err variant should detail the reason why they cannot make a purchase
-//         return Result::Err("Restricted purchase. Age too low.".to_owned());
-//     }
-// }
 
 fn main() {
     let joe = Customer {
         name: String::from("Joe"),
-        age: 33,
+        age: 13,
     };
 
-    // let sam = Customer {
-    //     name: "Sam".to_owned(),
-    //     age: 18,
-    // };
-
-    // === WITHOUT ? operator (Works)
+    // NOTE Cannot use ? inside main because main doesn't return Result type.
+    // Would have to chain main to -> Result<(), String> and add Err type must impl Debug
+    // or be a String.
     let is_restricted = is_restricted_purchase(&joe);
     // let is_restricted = is_restricted_purchase(&joe)?; // Error E02777 ? cannot be used
-    // println!("Restricted? is_restricted = {:?}", is_restricted); // Err("Restricted purchase")
-    println!("Restricted? is_restricted = {:?}", is_restricted); // Ok(false)
-
-    // To access the inner data from Result, need match express
-    match is_restricted {
-        // Ok(data) => println!("Ok(data) = {:?}", data), // E.g., false
-        Ok(data) => print_customer_name_if_not_restricted(data, &joe),
-        Err(e) => println!("error = {:?}", e), // E.g., error = "Restricted purchase. Age too low."
-    }
-
-    // === WITH ? operator (Error)
-    // let is_restricted = is_restricted_purchase(joe.age)?;
-    // // println!("Restricted? is_restricted = {:?}", is_restricted); // Err("Restricted purchase")
-    // println!("Restricted? is_restricted = {:?}", is_restricted); // Ok(false)
+    println!("Restricted? is_restricted = {:?}", is_restricted); // Ok(false) or Err("Restricted purchase")
 }
+
+// // === MY ATTEMPT - Result<bool, String>
+// // * Use a function to determine if a customer can make a restricted purchase
+// // Q: Do I return bool or unit type ()?
+// // A: Using the unit type is best when you just want to know if something is
+// // successful, and don't care about a successful value!
+// fn is_restricted_purchase(customer: &Customer) -> Result<bool, String> {
+//     // Q: Need match or just simple if/else?
+//     // A: A simple if seems better for this scenario
+//     if customer.age >= 21 {
+//         // * Return a result from the function
+//         // NOTE Have to 'return' or else it errors
+//         println!("Unrestricted purchase: age = {:?}", customer.age);
+//         // Ok(false); // Error
+//         // return Result::Ok(false); // Works
+//         // return Ok(false); // Works
+//         Ok(false) // Works
+//     } else {
+//         // Err("Restricted purchase. Age too low.".to_owned()); // Error
+//         // return Result::Err("Restricted purchase. Age too low.".to_owned()); // Works
+//         return Err("Restricted purchase. Age too low".to_owned()); // Works
+//     }
+// }
+
+// fn print_customer_name_if_not_restricted(is_restricted: bool, customer: &Customer) {
+//     match is_restricted {
+//         false => println!("Unrestricted customer: {:?}", customer.name),
+//         _ => println!("RESTRICTED! Can't print name!"),
+//     }
+// }
+
+// fn main() {
+//     let joe = Customer {
+//         name: String::from("Joe"),
+//         age: 33,
+//     };
+
+//     // NOTE Cannot use ? inside main because main doesn't return Result type.
+//     // Would have to chain main to -> Result<(), String> and add Err type must impl Debug
+//     // or be a String.
+//     let is_restricted = is_restricted_purchase(&joe);
+//     // let is_restricted = is_restricted_purchase(&joe)?; // Error E02777 ? cannot be used
+//     println!("Restricted? is_restricted = {:?}", is_restricted); // Ok(false) or Err("Restricted purchase")
+
+//     // To access the inner data from Result, need match expression
+//     match is_restricted {
+//         // Ok(data) => println!("Ok(data) = {:?}", data), // E.g., false
+//         Ok(data) => print_customer_name_if_not_restricted(data, &joe),
+//         Err(e) => println!("error = {:?}", e), // E.g., error = "Restricted purchase. Age too low."
+//     }
+// }
 
 // === SOLUTION
 // struct Customer {
