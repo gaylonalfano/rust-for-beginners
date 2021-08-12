@@ -19,6 +19,8 @@
 //   next level.
 
 // === L3 Attempt
+// FIXME Need to change struct Bills to HashMap<String, Bill> instead of
+// HashMap<String, f64>
 use std::collections::HashMap;
 use std::io;
 
@@ -38,6 +40,8 @@ fn get_user_input() -> String {
 struct Bills {
     // NOTE Common to use inner if it's the only field
     // inner: Vec<Bill>,
+    // NOTE For HashMap, you can have the key be String and the value
+    // be a full Bill struct. I originally used HashMap<String, f64>
     inner: HashMap<String, f64>,
 }
 
@@ -90,7 +94,7 @@ impl Bills {
     }
 
     fn remove_bill(&mut self) {
-        // let removed_bill = self.inner.pop();
+        println!("Enter name of bill:");
         let bill_to_remove = get_user_input();
         // TODO Determine whether bill exists
         self.inner.remove(&bill_to_remove);
@@ -157,27 +161,43 @@ impl Bill {
         println!("Enter bill name:");
         let name = get_user_input();
         println!("Enter bill amount:");
-        let amount = get_user_input();
-        let amount: f64 = amount
-            .parse()
-            .expect("Failed to convert amount from String to f64");
-        // FIXME Could handle the error from parse() instead of using expect()
+        // Method 1: Works but panics:
+        // let amount = get_user_input();
+        // let amount: f64 = amount
+        //     .parse()
+        //     .expect("Failed to convert amount from String to f64");
+
+        // Method 2: Handle the error from parse() instead of using expect()
         // Otherwise it panics and breaks the program
         // Q: How to handle parse Err variant without panicking?
         // The Err(_) variant can't just return a print because it expects f64
-        // Put it inside a loop? BROKEN ATTEMPT:
-        // loop {
-        //     let amount = get_user_input();
-        //     println!("Enter bill amount:");
-        //     let amount: f64 = match amount.parse() {
-        //         Ok(inner_amount) => inner_amount,
-        //         Err(_) => {
-        //             println!("Please enter a valid number.");
-        //             continue;
-        //         }
-        //     };
-        // }
-        Self { name, amount }
+        // A: The trick is to use Result<f64, ParseFloatError> when using parse()!
+        // Put it inside a loop
+        // TODO Could turn this into its own function get_bill_amount()
+        loop {
+            let amount = get_user_input();
+            println!("Enter bill amount:");
+            // NOTE Trick is to return Result<f64, _> instead of f64
+            // BROKEN:
+            // let amount: Result<f64, _> = match amount.parse() {
+            //     Ok(inner_amount) => {
+            //         let amount: f64 = inner_amount;
+            //         return Self { name, amount};
+            //     },
+            //     Err(_) => println!("Please enter a valid number")
+            // };
+            // WORKS:
+            // NOTE Trick is to return Result<f64, _> instead of f64
+            let parsed_amount: Result<f64, _> =  amount.parse();
+            match parsed_amount {
+                // NOTE MUST 'return' from inside loop, otherwise infinite!
+                Ok(inner_amount) => {
+                    let amount: f64 = inner_amount;
+                    return Self { name, amount };
+                },
+                Err(_) => println!("Please enter a valid number"),
+            }
+        }
     }
 }
 
