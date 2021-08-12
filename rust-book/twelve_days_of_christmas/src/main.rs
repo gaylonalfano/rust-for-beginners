@@ -64,6 +64,7 @@ fn main() {
         // previous days in the array.
         // A: Can consider converting type from u32 to usize to slice array
         // https://stackoverflow.com/questions/43704758/how-to-idiomatically-convert-between-u32-and-usize
+        // let day_index: usize = usize::try_from(d.day).unwrap();
         let day_index: usize = usize::try_from(d.day).unwrap();
         // let slice = &days[1..(day_index + 1)]; // error if index isn't usize
         // let slice = &days[1..3];  // works since it's a range
