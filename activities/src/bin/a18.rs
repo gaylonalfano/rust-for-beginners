@@ -140,7 +140,7 @@ fn is_restricted_purchase(customer: &Customer) -> Result<(), String> {
 fn main() {
     let joe = Customer {
         name: String::from("Joe"),
-        age: 13,
+        age: 30,
     };
 
     // NOTE Cannot use ? inside main because main doesn't return Result type.

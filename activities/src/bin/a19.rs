@@ -113,7 +113,7 @@ fn main() {
     inventory.insert("Couch", 0);
 
     for (item, quantity) in inventory.iter() {
-        // NOTE stock is a borrowed reference so need to dereference to get raw int:int comparison
+        // NOTE inventory quantity is a borrowed reference so need to dereference to get raw int:int comparison
         if *quantity == 0 {
             println!("{:?} is out of stock!", item);
         } else {
