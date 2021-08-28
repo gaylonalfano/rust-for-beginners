@@ -41,23 +41,37 @@ fn main() {
             date: "5/29/1981".to_owned(),
             ticket: Ticket::Backstage(80.0, "Luigi".to_owned()),
         },
+        Event {
+            name: String::from("Radiohead"),
+            date: "5/29/1981".to_owned(),
+            ticket: Ticket::Vip(10.0, "Peach".to_owned()),
+        },
     ];
 
     for event in tickets {
         match event.ticket {
             // NOTE Single expressions (no parens) are followed by commas, whereas as {} create a
             // new scope for the match arm/pattern.
-            Ticket::Standard(_) => {
-                println!("(arm 1) name: {:?}, date: {:?}", event.name, event.date)
+            Ticket::Standard(price) => {
+                println!("(arm 1) name: {:?}, date: {:?}, price: {:?}", event.name, event.date, price)
             }
             Ticket::Backstage(price, ticket_holder) => println!(
                 "(arm 2) name: {:?}, date: {:?}, price: {:?}, ticket_holder: {:?}",
                 event.name, event.date, price, ticket_holder
             ),
+            // "match guard" using conditional
+            // https://www.udemy.com/course/rust-coding-for-beginners/learn/lecture/23530310#questions/15403030
             Ticket::Vip(price, ticket_holder) if ticket_holder == "Mario" => {
-                println!("Mario! & price: {:?}", price)
+                println!("(arm 3) name: {:?}, price: {:?}", ticket_holder, price)
             }
-            Ticket::Vip(..) => println!("(arm 3) name: {:?}, date: {:?}", event.name, event.date),
+            // Using 'at binding' to only when price is at 10
+            // Eg. Ticket {price: p @ 10, event} => println!("event @ {} = {}, p, event")
+            // FIXME Can't get 'at binding' to work on this arm because Ticket is enum (not struct)
+            // Ticket::Vip(price: p @ 10.0, ticket_holder) => {
+            //     println!("(arm 4) name: {:?}, date: {:?}, price: {:?}", event.name, event.date, p)
+            // }
+            // Match on price only
+            Ticket::Vip(price, ..) => println!("(arm 5) date: {:?}, price: {:?}", event.date, price),
         }
     }
 }
