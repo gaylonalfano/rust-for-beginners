@@ -96,7 +96,7 @@ enum PowerState {
 }
 
 // * Use a function with a match expression to print out the power messages
-//   * The function should accept the enum as an input
+// * The function should accept the enum as an input
 fn print_power_state(state: PowerState) {
     match state {
         PowerState::Hibernate => println!("Current state: Hibernating..."),
@@ -121,6 +121,7 @@ fn convert_input_to_state(input: &str) -> Result<PowerState, String> {
 
 fn main() {
     let mut user_input = String::new();
+    println!("Enter power state:");
     io::stdin()
         .read_line(&mut user_input)
         .expect("Invalid user input");
