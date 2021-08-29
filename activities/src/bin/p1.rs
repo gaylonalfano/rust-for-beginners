@@ -85,6 +85,8 @@ impl Bills {
     }
 
     fn view_bills(&self) {
+        // NOTE When iterating over HashMaps, the (k, v) are BORROWED (&String, &Bill)
+        // If Bills was a Vec, then we'd have to use clone() to stored owned values
         for (bill, amount) in self.inner.iter() {
             println!("bill = {:?}, amount = {:?}", bill, amount);
         }
@@ -95,11 +97,57 @@ impl Bills {
     }
 
     fn remove_bill(&mut self) {
-        println!("Enter name of bill:");
+        println!("Enter name of bill to REMOVE:");
         let bill_to_remove = get_user_input();
-        // TODO Determine whether bill exists
-        self.inner.remove(&bill_to_remove);
+        if self.inner.contains_key(&bill_to_remove) {
+            self.inner.remove(&bill_to_remove);
+            println!("Removed bill: {:?}", &bill_to_remove);
+        } else {
+            println!("Bill not found. Please double-check bill name and try again.");
+            // Q: Do I need to re-run remove_bill_menu()?
+            // A: Doesn't seem so because this is called within a loop inside main()
+        }
         // println!("Removed bill = {:?}", self.inner[&bill_to_remove]);
+    }
+
+    fn edit_bill_menu(&mut self) {
+        self.edit_bill();
+    }
+
+    fn edit_bill(&mut self) {
+        println!("Enter name of bill to EDIT:");
+        let bill_name_to_edit = get_user_input();
+        // Q: Do I really need to first do an if self.inner.contains_key() check 
+        // if I also use inner.get_mut(), which returns an Option<&mut Bill>, 
+        // which means I need to handle the None variant anyway?
+        // NOTE Both together works. Let's see if I can remove the contains_key() check...
+        // A: NOPE! I can remove the if self.inner.contains_key() check and just use .get_mut()
+        let bill_to_edit: Option<&mut Bill> = self.inner.get_mut(&bill_name_to_edit);
+        // NOTE Could just directly: match self.inner.get_mut(&bill_name_to_edit) {...}
+        match bill_to_edit {
+            Some(bill) => {
+            // Q: What's a standard way of editing a k:v pair in HashMaps if I wanted to update
+            // BOTH the name and amount?
+            // NOTE If they change the name then we need to update the KEY value as well
+            // Q: Do I even need to do this loop? Tutorial just updates bill.amount basically
+            // A: Yes! Still need to do the whole String to f64 conversion...
+            loop {
+                println!("Enter bill amount:");
+                let amount = get_user_input();
+                // NOTE Trick is to return Result<f64, _> instead of f64
+                let parsed_amount: Result<f64, _> =  amount.parse();
+                match parsed_amount {
+                    // IMPORTANT MUST 'return' from inside loop, otherwise infinite!
+                    Ok(inner_amount) => {
+                        bill.amount = inner_amount;
+                        return
+                    },
+                    Err(_) => println!("Please enter a valid number"),
+                }
+            }
+            }
+            None => println!("No matching bill to edit"),
+        }
     }
 }
 
@@ -108,7 +156,7 @@ enum MenuOption {
     Add,
     View,
     Remove,
-    // Edit,
+    Edit,
 }
 
 impl MenuOption {
@@ -116,6 +164,7 @@ impl MenuOption {
         println!("\n** Manage Bills **");
         println!("'add' - Add bill");
         println!("'view' - View bills");
+        println!("'edit' - Edit bill");
         println!("'remove' - Remove bill");
         println!("'quit' - Quit");
         println!("-------------------\n");
@@ -127,12 +176,12 @@ impl MenuOption {
         match input.as_str() {
             "add" => Some(MenuOption::Add),
             "view" => Some(MenuOption::View),
+            "edit" => Some(MenuOption::Edit),
             "remove" => Some(MenuOption::Remove),
             _ => None,
         }
     }
 
-    // TODO Could consider adding a process_option() function
     // Could also consider returning a Result<(), String> based on whether
     // the CRUD commands are successful. This would give me the added bonus
     // of being able to use the ? operator on the CRUD methods as well.
@@ -146,6 +195,7 @@ impl MenuOption {
         match option {
             MenuOption::Add => Bills::add_bill_menu(bills),
             MenuOption::View => Bills::view_bills_menu(bills),
+            MenuOption::Edit => Bills::edit_bill_menu(bills),
             MenuOption::Remove => Bills::remove_bill_menu(bills),
         }
     }
@@ -161,7 +211,6 @@ impl Bill {
     fn new() -> Self {
         println!("Enter bill name:");
         let name = get_user_input();
-        println!("Enter bill amount:");
         // Method 1: Works but panics:
         // let amount = get_user_input();
         // let amount: f64 = amount
@@ -176,8 +225,8 @@ impl Bill {
         // Put it inside a loop
         // TODO Could turn this into its own function get_bill_amount()
         loop {
-            let amount = get_user_input();
             println!("Enter bill amount:");
+            let amount = get_user_input();
             // BROKEN:
             // let amount: Result<f64, _> = match amount.parse() {
             //     Ok(inner_amount) => {
