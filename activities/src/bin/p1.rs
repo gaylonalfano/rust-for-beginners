@@ -177,7 +177,6 @@ impl Bill {
         loop {
             let amount = get_user_input();
             println!("Enter bill amount:");
-            // NOTE Trick is to return Result<f64, _> instead of f64
             // BROKEN:
             // let amount: Result<f64, _> = match amount.parse() {
             //     Ok(inner_amount) => {
@@ -277,9 +276,6 @@ fn main() {
 //     }
 
 //     fn view_bills(&self) {
-//         // NOTE Returning borrowed Vec from Bills since already
-//         // created the Vec.
-//         // &self.inner
 //         for (bill, amount) in self.inner.iter() {
 //             println!("bill = {:?}, amount = {:?}", bill, amount);
 //         }
@@ -421,7 +417,7 @@ fn main() {
 
 // impl Bills {
 //     fn new() -> Self {
-//         // NOTE Set to an empty vector so can have mulptiple Bills structs through
+//         // NOTE Set to an empty vector so can have mulptiple Bills structs throughout
 //         // and makes it easier if we wish to change structure later as we only
 //         // need to update the code once inside this struct, instead of everywhere the
 //         // struct is used.
