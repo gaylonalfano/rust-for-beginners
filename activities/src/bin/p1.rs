@@ -24,13 +24,21 @@
 use std::collections::HashMap;
 use std::io;
 
-fn get_user_input() -> String {
+fn get_user_input() -> Option<String> {
     let mut input = String::new();
     // NOTE Handy trick of using while loop to keep reading until valid input
     while io::stdin().read_line(&mut input).is_err() {
         println!("Please enter your input again");
     }
-    input.trim().to_lowercase()
+    // NOTE Give the user a chance to go back/exit the menu. To do this,
+    // need to return Option<String> so we can use Some/None
+    let input = input.trim().to_lowercase();
+    // Q: Need to borrow input? (&input)
+    if input == "" {
+        None
+    } else {
+        Some(input)
+    }
 }
 
 // Q: How to create a global, mutable vector to store all bills?
@@ -98,7 +106,10 @@ impl Bills {
 
     fn remove_bill(&mut self) {
         println!("Enter name of bill to REMOVE:");
-        let bill_to_remove = get_user_input();
+        let bill_to_remove = match get_user_input() {
+            Some(bill_to_remove) => bill_to_remove,
+            None => return,
+        };
         if self.inner.contains_key(&bill_to_remove) {
             self.inner.remove(&bill_to_remove);
             println!("Removed bill: {:?}", &bill_to_remove);
@@ -116,7 +127,12 @@ impl Bills {
 
     fn edit_bill(&mut self) {
         println!("Enter name of bill to EDIT:");
-        let bill_name_to_edit = get_user_input();
+        let bill_name_to_edit = match get_user_input() {
+            Some(bill_name_to_edit) => bill_name_to_edit,
+            None => return,
+        };
+
+
         // Q: Do I really need to first do an if self.inner.contains_key() check 
         // if I also use inner.get_mut(), which returns an Option<&mut Bill>, 
         // which means I need to handle the None variant anyway?
@@ -133,7 +149,10 @@ impl Bills {
             // A: Yes! Still need to do the whole String to f64 conversion...
             loop {
                 println!("Enter bill amount:");
-                let amount = get_user_input();
+                let amount = match get_user_input() {
+                    Some(amount) => amount,
+                    None => return,
+                };
                 // NOTE Trick is to return Result<f64, _> instead of f64
                 let parsed_amount: Result<f64, _> =  amount.parse();
                 match parsed_amount {
@@ -171,7 +190,11 @@ impl MenuOption {
     }
 
     fn get_user_option() -> Option<MenuOption> {
-        let input = get_user_input();
+        let input = match get_user_input() {
+            Some(input) => input,
+            // FIXME Error with just returning ()...
+            None => return,  // return; is same as return ();
+        };
 
         match input.as_str() {
             "add" => Some(MenuOption::Add),
@@ -210,7 +233,10 @@ struct Bill {
 impl Bill {
     fn new() -> Self {
         println!("Enter bill name:");
-        let name = get_user_input();
+        let name = match get_user_input() {
+            Some(name) => name,
+            None => return,
+        };
         // Method 1: Works but panics:
         // let amount = get_user_input();
         // let amount: f64 = amount
@@ -226,7 +252,10 @@ impl Bill {
         // TODO Could turn this into its own function get_bill_amount()
         loop {
             println!("Enter bill amount:");
-            let amount = get_user_input();
+            let amount = match get_user_input() {
+                Some(amount) => amount,
+                None => return,
+            };
             // BROKEN:
             // let amount: Result<f64, _> = match amount.parse() {
             //     Ok(inner_amount) => {
