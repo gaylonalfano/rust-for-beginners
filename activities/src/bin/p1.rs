@@ -42,7 +42,7 @@ struct Bills {
     // inner: Vec<Bill>,
     // NOTE For HashMap, you can have the key be String and the value
     // be a full Bill struct. I originally used HashMap<String, f64>
-    inner: HashMap<String, f64>,
+    inner: HashMap<String, Bill>,
 }
 
 impl Bills {
@@ -68,8 +68,12 @@ impl Bills {
     // Q: How to make the bills vector mutable?
     // A: You gotta have a &mut self reference otherwise can't figure out how
     fn add_bill(&mut self, bill: Bill) {
-        // self.inner.push(bill); // Or, accessed via self.0.push(new_bill);
-        self.inner.insert(bill.name, bill.amount);
+        // NOTE With HashMap need to use clone(), otherwise bill.name gets moved into
+        // the HashMap. HashMaps require an owned String for the Key, but if we move
+        // the original bill.name (no clone) into the HashMap, then we no longer have
+        // access to bill.name because the Bill will no longer have ownership of the name
+        // property, and therefore won't properly compile (partial move error)
+        self.inner.insert(bill.name.clone(), bill);
     }
 
     fn view_bills_menu(&self) {
@@ -81,9 +85,6 @@ impl Bills {
     }
 
     fn view_bills(&self) {
-        // NOTE Returning borrowed Vec from Bills since already
-        // created the Vec.
-        // &self.inner
         for (bill, amount) in self.inner.iter() {
             println!("bill = {:?}, amount = {:?}", bill, amount);
         }
