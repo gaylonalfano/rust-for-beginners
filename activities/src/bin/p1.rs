@@ -19,8 +19,6 @@
 //   next level.
 
 // === L3 Attempt
-// FIXME Need to change struct Bills to HashMap<String, Bill> instead of
-// HashMap<String, f64>
 use std::collections::HashMap;
 use std::io;
 
@@ -34,7 +32,7 @@ fn get_user_input() -> Option<String> {
     // need to return Option<String> so we can use Some/None
     let input = input.trim().to_lowercase();
     // Q: Need to borrow input? (&input)
-    if input == "" {
+    if &input == "" {
         None
     } else {
         Some(input)
@@ -67,7 +65,11 @@ impl Bills {
 
     fn add_bill_menu(&mut self) {
         let new_bill = Bill::new();
-        self.add_bill(new_bill);
+        match new_bill {
+            Some(inner_bill) => self.add_bill(inner_bill),
+            None => (),
+        }
+        // self.add_bill(new_bill);
     }
     // Q: Do I return Result type, Self, or nothing at all?
     // I can return Self for new() but doesn't make sense for other methods.
@@ -193,7 +195,13 @@ impl MenuOption {
         let input = match get_user_input() {
             Some(input) => input,
             // FIXME Error with just returning ()...
-            None => return,  // return; is same as return ();
+            // Q: How to use None => return if the function expects to 
+            // return a String? Getting an error...
+            // A: Looks like when the fn returns an Option, you can
+            // use None => return None, to return the correct type.
+            // NOTE return; is same as return ();
+            // None => return,  // Error
+            None => return None,
         };
 
         match input.as_str() {
@@ -231,12 +239,33 @@ struct Bill {
 }
 
 impl Bill {
-    fn new() -> Self {
+    fn new() -> Option<Self> {
         println!("Enter bill name:");
         let name = match get_user_input() {
             Some(name) => name,
-            None => return,
+            None => return None, // Error: return type is not () unit type (it's 'Bill')
+            // Q: Do I need to make new() return an Option or Result? Again, I'm trying
+            // to give user a chance to cancel/go back in the menu by making get_user_input()
+            // return an Option type.
+            // A: Yes! Make this return Option<Self> and then that enables me to use the
+            // return None variants. If it returns None, then menu cancels.
         };
+
+        // Q: How to use this new get_bill_amount() fn without have a self to reference?
+        // Remove the &self parameter from get_bill_amount() fn?
+        // A: Yea, removing the &self param AND making new() -> Option<Self>, instead of
+        // just Self, seemed to help!
+        let amount = match Bill::get_bill_amount() {
+            Some(inner_amount) => inner_amount,
+            None => return None,
+        };
+
+        // Already have return None (above), so should be able to just return
+        // the Some() variant for the entire new() fn.
+        Some(Self { name, amount })
+    }
+
+    fn get_bill_amount() -> Option<f64> {
         // Method 1: Works but panics:
         // let amount = get_user_input();
         // let amount: f64 = amount
@@ -254,7 +283,7 @@ impl Bill {
             println!("Enter bill amount:");
             let amount = match get_user_input() {
                 Some(amount) => amount,
-                None => return,
+                None => return None,
             };
             // BROKEN:
             // let amount: Result<f64, _> = match amount.parse() {
@@ -268,14 +297,17 @@ impl Bill {
             // NOTE Trick is to return Result<f64, _> instead of f64
             let parsed_amount: Result<f64, _> =  amount.parse();
             match parsed_amount {
-                // NOTE MUST 'return' from inside loop, otherwise infinite!
                 Ok(inner_amount) => {
-                    let amount: f64 = inner_amount;
-                    return Self { name, amount };
+                    // NOTE MUST 'return' from inside loop, otherwise infinite!
+                    return Some(inner_amount);
                 },
-                Err(_) => println!("Please enter a valid number"),
+                Err(_) => {
+                    println!("Please enter a valid number");
+                    return None;
+                },
             }
         }
+
     }
 }
 
