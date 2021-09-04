@@ -35,8 +35,8 @@ fn main() {
     // NOTE We can even chain multiple .map() calls!
     // This makes it super easy to chain until you get the data type
     // you want.
-    let word_length: Option<usize> = maybe_word()
-        .map(|word| word.len())
-        .map(|len| len * 2);
+    // let word_length: Option<usize> = maybe_word()
+    //     .map(|word| word.len())
+    //     .map(|len| len * 2)
 
 }
