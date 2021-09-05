@@ -1,4 +1,6 @@
 // NOTES
+// - cargo test --help
+// - To run a test use: cargo test --bin [filename]
 // - For test modules you need to include a macro that tells the
 // compiler that this module is specific to testing
 // - Testing in Rust works where if the test ABORTS the program,
@@ -31,7 +33,7 @@ mod test {
     #[test]
     fn check_all_caps() {
         let result = all_caps("hello");
-        let expected = String::from("HELLO");
+        let expected = String::from("hello");
         assert_eq!(result, expected, "String should be all uppercase");
     }
 
