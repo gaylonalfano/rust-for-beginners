@@ -46,6 +46,7 @@ fn main() {
     // use 'match' to access inner data). If the original 'a' has no data, then
     // the default value (i.e., 0 in this case) will be stored in variable.
     // This is useful to set a default value if no data is originally provided
+    // or_else() -> Option<T> whereas unwrap_or_else() -> T
     let unwrapped = a.unwrap_or_else(|| 0);
     dbg!(unwrapped);
 }
