@@ -45,17 +45,44 @@
 //   * Each new type should implement a `new` function
 // * Create a function for each type of clothes (shoes, shirt, pants)
 //   that accepts the new type specific to that type of clothing
+//   NOTE The reason for even wrapping Color enum with a new custom
+//   TUPLE type/struct, is ensure that we don't accidentally swap the
+//   clothing items and display the wrong color info. By creating these
+//   separate, unique types of data (PantsColor, ShirtColor, etc) we will
+//   get an error if we accidentally switch the variables
+//   NOTE You can even restrict certain clothing types to only allow
+//   certain colors
 
-struct Pants(Color);
-impl Pants {
-    pub fn new(clothing_type: Self, c: Color) -> Result<Self, String> {
-        match c {
-            Black => Ok(Self(Color::Black)),
-            _ => Err("Not Black".to_owned())
+#[derive(Debug)]
+struct PantsColor(Color);
+impl PantsColor {
+    // NOTE You can even restrict certain clothing types to only allow
+    // certain colors
+    pub fn new(color: Color) -> Result<Self, String> {
+        match color {
+            Color::Purple => Err("Pants cannot be purple".to_owned()),
+            c => Ok(Self(c)),
         }
     }
 }
 
+#[derive(Debug)]
+struct ShirtColor(Color);
+impl ShirtColor {
+    pub fn new(c: Color) -> Self {
+        Self(c)
+    }
+}
+
+#[derive(Debug)]
+struct ShoesColor(Color);
+impl ShoesColor {
+    pub fn new(c: Color) -> Self {
+        Self(c)
+    }
+}
+
+#[derive(Debug)]
 enum Color {
     Black,
     Blue,
@@ -69,9 +96,33 @@ enum Color {
     Yellow,
 }
 
+fn print_shirt_color(color: ShirtColor) {
+    println!("shirt color = {:?}", color);
+}
+
+fn print_pants_color(color: PantsColor) {
+    println!("pants color = {:?}", color);
+}
+
+fn print_shoes_color(color: ShoesColor) {
+    println!("shoes color = {:?}", color);
+}
+
 fn main() {
-    match Pants::new(Pants, Color::Black) {
-        Ok(clothing) => println!("{:?}", clothing),
-        Err(e) => println!("{:?}", e),
-    }
+    let gray_shirt = ShirtColor::new(Color::Gray);
+    let black_pants = PantsColor::new(Color::Black).unwrap_or(PantsColor(Color::Black));
+    // Q: How to not allow purple pants? How to get the inner value for Result<PantsColor, String>?
+    // A: TL;DR - Better would be to create another enum for pant colors where all are valid,
+    // rather than trying to restrict via using this Result<T, E> approach. Ideally you make
+    // Struct::new() ALWAYS work!
+    // A: If you must stick with Result, then you could use the .unwrap_or() method
+    let purple_not_allowed_pants = PantsColor::new(Color::Purple).unwrap_or(PantsColor(Color::Custom(String::from("purple_not_allowed"))));
+    let blue_shoes = ShoesColor::new(Color::Blue);
+    let orange_pants = PantsColor::new(Color::Custom(String::from("orange"))).unwrap_or(PantsColor(Color::Black));
+
+    print_pants_color(black_pants);
+    print_pants_color(purple_not_allowed_pants);
+    print_shirt_color(gray_shirt);
+    print_shoes_color(blue_shoes);
+    print_pants_color(orange_pants);
 }
