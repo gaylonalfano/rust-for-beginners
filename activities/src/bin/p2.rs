@@ -30,6 +30,7 @@ use std::fs::File;
 use std::path::PathBuf;
 use std::io::prelude::*;
 use std::collections::HashMap;
+use thiserror::Error;
 
 // NOTE Creating a custom struct that WRAPS a HashMap. We want to store data in HashMap,
 // but we don't want to pass around the HashMap to all our functions. Better approach is
@@ -37,7 +38,8 @@ use std::collections::HashMap;
 // HashMap, we just change inside this custom RecordsMap wrapper struct.
 #[derive(Debug)]
 struct RecordsMap {
-    inner: HashMap<i64, Record>,
+    // inner: HashMap<i64, Record>,
+    inner: HashMap<String, Record>,
 }
 
 impl RecordsMap {
@@ -45,47 +47,139 @@ impl RecordsMap {
         Self { inner: HashMap::new() }
     }
 
+    // Create a function that can add a new Record to our HashMap
+    // NOTE We'll use this once we load/parse the CSV
     fn add(&mut self, record: Record) {
-        self.inner.insert(record.id, record); // { 1: Record {} }
+        // NOTE HashMaps require a String for the key so need to use clone()
+        // I'll later change the key to be i64
+        self.inner.insert(record.id.clone(), record); // { 1: Record {} }
     }
 }
 
 #[derive(Debug)]
 struct Record {
-    id: i64,
+    // id: i64,
+    id: String,
     name: String,
     email: Option<String>,
 }
 
-fn load_records(path: PathBuf) -> std::io::Result<RecordsMap> {
-    let path = PathBuf::from(r"~/Code/rust-for-beginners/activities/src/bin/foo.txt");
-    let mut file = File::open(path)?;
+// TODO Create a custom ParseError enum for parsing the CSV
+#[derive(Debug, Error)]
+enum ParseError {
+
+    #[error("invalid id format")]
+    InvalidIdFormat,
+
+    #[error("empty record")]
+    EmptyRecord,
+
+    #[error("missing required field")]
+    MissingRequiredField, 
+}
+
+
+// WORKING EXAMPLE
+// fn load_records() -> std::io::Result<()> {
+//     let path = PathBuf::from("src/bin/foo.txt");
+//     let mut file = File::open(path)?;
+//     let mut contents = String::new();
+//     file.read_to_string(&mut contents)?;
+//     println!("contents = {:?}", contents);
+//     assert_eq!(contents, "Hello, world!\n");
+//     Ok(())
+// }
+
+fn load_records(file_path: PathBuf) -> std::io::Result<RecordsMap> {
+    // Q: How do you slowly debug/iterate when dealing with returning
+    // certain types with functions? E.g., I just want to test out
+    // how to read the file and parse line-by-line. In order to do that,
+    // I have to make it return a simple/empty placeholder (RecordsMap::new())
+    // just to get the program to compile.
+    // 1. Try to open the file
+    let mut file = File::open(file_path)?;
+    // 2. Create an empty buffer to store the content
     let mut contents = String::new();
     file.read_to_string(&mut contents)?;
-    assert_eq!(contents, "Hello, world!");
-    Ok(RecordsMap::new())
+    println!("contents = {:?}", contents);
+    // 3. Everything good to this point, return our Ok variant RecordsMap
+    Ok(parse_records(contents))
+}
+
+// TODO Need a function that actually goes through the CSV records
+fn parse_records(records: String) -> RecordsMap {
+    // Create a new RecordsMap to work with
+    let mut records_map = RecordsMap::new();
+
+    // TODO Use the 'split' function to split by comma
+    let lines: Vec<&str> = records.split('\n').collect();
+    // println!("{:?}", lines);  // ["5,Gaylon A.,", "", "7,Ash,a@email.com"]
+
+    // Loop through vector and convert each record to Record type
+    for line in lines {
+        // TODO
+        // Split the line by ','
+        let v: Vec<&str> = line.split(',').collect();
+        // println!("v= {:?}", v); // v= ["500", "Gonzalo Buxey", "gbuxeydv@dedecms.com"]
+        if v.len() < 2 || v.len() > 3 {
+            // TODO Return a custom error?
+            continue
+        } else {
+            // Validate each field in v
+            // NOTE Vec types have the get() and get_mut() methods
+            // E.g., make sure id is_numeric, id and name are there, etc.
+            // Capture each field value
+            let id = v.get(0).unwrap_or_else(|| &"id_default");
+            let name = v.get(1).unwrap_or_else(|| &"name_default");
+            let email = v.get(2).unwrap_or_else(|| &"email_default");
+
+            // Convert to Record type
+            let new_record: Record = Record {
+                id: id.to_string(),
+                name: name.to_string(),
+                email: Some(email.to_string()),
+            };
+
+            // Add this new record to our records_map
+            records_map.add(new_record);
+        }
+    }
+
+    // Return complete RecordsMap
+    println!("Final parsed RecordsMap = {:?}", records_map);
+    records_map
 }
 
 fn main() {
-    let mut records = RecordsMap::new();
 
-    let record_one = Record { id: 1, name: "one".to_string(), email: None };
-    let record_two = Record { id: 2, name: "two".to_string(), email: Some("two@email.com".to_owned()) };
-    let record_three = Record { id: 3, name: "three".to_string(), email: Some("three@email.com".to_owned()) };
+    // let record_one = Record { id: 1, name: "one".to_string(), email: None };
+    // let record_two = Record { id: 2, name: "two".to_string(), email: Some("two@email.com".to_owned()) };
+    // let record_three = Record { id: 3, name: "three".to_string(), email: Some("three@email.com".to_owned()) };
 
     // Add our records into our new HashMap
-    records.add(record_one);
-    records.add(record_two);
-    records.add(record_three);
-    println!("{:?}", records);
+    // records.add(record_one);
+    // records.add(record_two);
+    // records.add(record_three);
+    // println!("{:?}", records);
 
-    for (id, record) in records.inner.iter() {
-        println!("id = {:?}, name = {:?}, email = {:?}", id, record.name, record.email);
-    }
-
-    // println!("{:?}", record_one);
-    // println!("{:?}", record_two);
-    // println!("{:?}", record_three);
+    // for (id, record) in records.inner.iter() {
+    //     println!("id = {:?}, name = {:?}, email = {:?}", id, record.name, record.email);
+    // }
 
     // Let's try to read our CSV file
+    let file_path = PathBuf::from(r"src/bin/p2_data.csv");
+    load_records(file_path).expect("Unable to load records");
+
+
+    // == WORKS
+    // let mut file = File::open("./src/bin/foo.txt")?;
+    // let mut contents = String::new();
+    // file.read_to_string(&mut contents)?;
+    // assert_eq!(contents, "Hello, world!\n");
+    // Ok(())
+
+    // == Splitting a String by commas
+    // let x = "id,name,email".to_string();
+    // let v: Vec<&str> = x.split(',').collect();
+    // println!("{:?}", v);
 }
