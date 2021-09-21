@@ -25,6 +25,9 @@
 // * Make your program robust: there are 7 errors & multiple blank lines
 //   present in the data.
 
+// === NOTES
+// - String.split('\n').enumerate() is handy to get an index + value
+
 
 use std::fs::File;
 use std::path::PathBuf;
@@ -67,7 +70,6 @@ struct Record {
 // TODO Create a custom ParseError enum for parsing the CSV
 #[derive(Debug, Error)]
 enum ParseError {
-
     #[error("invalid id format")]
     InvalidIdFormat,
 
@@ -111,27 +113,48 @@ fn parse_records(records: String) -> RecordsMap {
     // Create a new RecordsMap to work with
     let mut records_map = RecordsMap::new();
 
+    // NOTE Use for loop w/ String.split().enumerate() for less temp vars
+    for (i, record) in records.split('\n').enumerate() {
+        // NOTE Only check the TRUE condition to save code
+        if record != "" {
+            // TODO match on the parse_record() -> Result<Record, ParseError>
+            match parse_record(record) {
+                Ok(r) => {
+                    records_map.add(r);
+                }
+                Err(e) => { println!("error on line {}: {}\n  >> \"{}\"\n", i + 1, e, record); }
+            }
+        }
+    }
+
+    // === ORIGINAL parse record attempt
     // TODO Use the 'split' function to split by newline
     let lines: Vec<&str> = records.split('\n').collect();
     // println!("{:?}", lines);  // ["5,Gaylon A.,", "", "7,Ash,a@email.com"]
 
     // Loop through vector and convert each record to Record type
     for line in lines {
+        // === ORIGINAL ATTEMPT:
         // Split the line by ','
-        let v: Vec<&str> = line.split(',').collect();
-        // println!("v= {:?}", v); // v= ["500", "Gonzalo Buxey", "gbuxeydv@dedecms.com"]
-        if v.len() < 2 || v.len() > 3 {
+        let fields: Vec<&str> = line.split(',').collect();
+        // println!("fields= {:?}", fields); // fields= ["500", "Gonzalo Buxey", "gbuxeydv@dedecms.com"]
+        // NOTE Solution use 'if record != ""' instead
+        if fields.len() < 2 || fields.len() > 3 {
             // TODO Return a custom error?
+            // Q: How to add/use these custom errors?
+            // A: Solution created separate parse_record(record: &str) -> Result<Record,
+            // ParseError> function to handle
             continue
         } else {
             // FIXME Could make this validation more robust and custom errors
-            // Validate each field in v
+            // NOTE Solution created separate parse_record(record: &str) -> Result<Record,
+            // ParseError> function to handle
             // NOTE Vec types have the get() and get_mut() methods
             // E.g., make sure id is_numeric, id and name are there, etc.
             // Capture each field value
-            let id = v.get(0).unwrap_or_else(|| &"id_default");
-            let name = v.get(1).unwrap_or_else(|| &"name_default");
-            let email = v.get(2).unwrap_or_else(|| &"email_default");
+            let id = fields.get(0).unwrap_or_else(|| &"id_default");
+            let name = fields.get(1).unwrap_or_else(|| &"name_default");
+            let email = fields.get(2).unwrap_or_else(|| &"email_default");
 
             // Convert to Record type
             let new_record: Record = Record {
@@ -148,6 +171,43 @@ fn parse_records(records: String) -> RecordsMap {
     // Return complete RecordsMap
     println!("Final parsed RecordsMap = {:?}", records_map);
     records_map
+}
+
+fn parse_record(record: &str) -> Result<Record, ParseError> {
+    // E.g.: "5,Gaylon A.,", "", "7,Ash,a@email.com"
+    let fields: Vec<&str> = record.split(',').collect();
+
+    // NOTE Use the Vec.get() method but along w/ match since get() -> Option
+    // My original attempt used .get().unwrap_or_else(|| &"default_id")
+    let id = match fields.get(0) {
+        // Q: How to convert a &str to i64?
+        Some(id) => id.to_string(),
+        // NOTE It's here that we can return early our custom error
+        None => return Err(ParseError::EmptyRecord),
+    };
+
+    let name = match fields.get(1) {
+        // Q: What's the difference between to_owned() vs to_string()?
+        // Only when I use to_string() does it not error...
+        Some(name) => name.to_string(), // Error if I use to_owned()
+        // NOTE It's here that we can return early our custom error
+        None => return Err(ParseError::MissingRequiredField),
+    };
+
+    // NOTE Solution used .get().map(|e| e.to_string()).filter(|e| e != "");
+    // I still need to handle getting email into a String type for Record struct
+    let email = fields.get(2).unwrap_or_else(|| &"").to_string();
+    // let email = fields.get(2).map(|e| e.to_string()).filter(|e| e != "");
+
+    // Return our completed Record
+    let new_record = Record {
+        id,
+        name,
+        email: Some(email)
+    };
+
+    Ok(new_record)
+
 }
 
 fn main() {
