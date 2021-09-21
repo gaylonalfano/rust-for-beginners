@@ -111,13 +111,12 @@ fn parse_records(records: String) -> RecordsMap {
     // Create a new RecordsMap to work with
     let mut records_map = RecordsMap::new();
 
-    // TODO Use the 'split' function to split by comma
+    // TODO Use the 'split' function to split by newline
     let lines: Vec<&str> = records.split('\n').collect();
     // println!("{:?}", lines);  // ["5,Gaylon A.,", "", "7,Ash,a@email.com"]
 
     // Loop through vector and convert each record to Record type
     for line in lines {
-        // TODO
         // Split the line by ','
         let v: Vec<&str> = line.split(',').collect();
         // println!("v= {:?}", v); // v= ["500", "Gonzalo Buxey", "gbuxeydv@dedecms.com"]
@@ -125,6 +124,7 @@ fn parse_records(records: String) -> RecordsMap {
             // TODO Return a custom error?
             continue
         } else {
+            // FIXME Could make this validation more robust and custom errors
             // Validate each field in v
             // NOTE Vec types have the get() and get_mut() methods
             // E.g., make sure id is_numeric, id and name are there, etc.
