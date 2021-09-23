@@ -54,15 +54,21 @@ impl RecordsMap {
     // NOTE We'll use this once we load/parse the CSV
     fn add(&mut self, record: Record) {
         // NOTE HashMaps require a String for the key so need to use clone()
-        // I'll later change the key to be i64
-        self.inner.insert(record.id.clone(), record); // { 1: Record {} }
+        self.inner.insert(record.id.to_string(), record); // { 1: Record {} }
+    }
+
+    fn get_contact_by_id(self, id: &str) {
+        match self.inner.get(&id.to_owned()) {
+            Some(record) => println!("record={:?}",record),
+            None => println!("Contact not found"),
+        }
     }
 }
 
 #[derive(Debug)]
 struct Record {
-    // id: i64,
-    id: String,
+    id: i64,
+    // id: String,
     name: String,
     email: Option<String>,
 }
@@ -71,7 +77,8 @@ struct Record {
 #[derive(Debug, Error)]
 enum ParseError {
     #[error("invalid id format")]
-    InvalidIdFormat,
+    // NOTE This must impl the From trait from ParseIntError
+    InvalidIdFormat(#[from] std::num::ParseIntError),
 
     #[error("empty record")]
     EmptyRecord,
@@ -80,17 +87,6 @@ enum ParseError {
     MissingRequiredField, 
 }
 
-
-// WORKING EXAMPLE
-// fn load_records() -> std::io::Result<()> {
-//     let path = PathBuf::from("src/bin/foo.txt");
-//     let mut file = File::open(path)?;
-//     let mut contents = String::new();
-//     file.read_to_string(&mut contents)?;
-//     println!("contents = {:?}", contents);
-//     assert_eq!(contents, "Hello, world!\n");
-//     Ok(())
-// }
 
 fn load_records(file_path: PathBuf) -> std::io::Result<RecordsMap> {
     // Q: How do you slowly debug/iterate when dealing with returning
@@ -103,21 +99,18 @@ fn load_records(file_path: PathBuf) -> std::io::Result<RecordsMap> {
     // 2. Create an empty buffer to store the content
     let mut contents = String::new();
     file.read_to_string(&mut contents)?;
-    println!("contents = {:?}", contents);
+    // println!("contents = {:?}", contents);
     // 3. Everything good to this point, return our Ok variant RecordsMap
     Ok(parse_records(contents))
 }
 
-// TODO Need a function that actually goes through the CSV records
 fn parse_records(records: String) -> RecordsMap {
-    // Create a new RecordsMap to work with
     let mut records_map = RecordsMap::new();
 
     // NOTE Use for loop w/ String.split().enumerate() for less temp vars
     for (i, record) in records.split('\n').enumerate() {
         // NOTE Only check the TRUE condition to save code
         if record != "" {
-            // TODO match on the parse_record() -> Result<Record, ParseError>
             match parse_record(record) {
                 Ok(r) => {
                     records_map.add(r);
@@ -127,49 +120,49 @@ fn parse_records(records: String) -> RecordsMap {
         }
     }
 
-    // === ORIGINAL parse record attempt
-    // TODO Use the 'split' function to split by newline
-    let lines: Vec<&str> = records.split('\n').collect();
-    // println!("{:?}", lines);  // ["5,Gaylon A.,", "", "7,Ash,a@email.com"]
+    // // === ORIGINAL parse record attempt
+    // // TODO Use the 'split' function to split by newline
+    // let lines: Vec<&str> = records.split('\n').collect();
+    // // println!("{:?}", lines);  // ["5,Gaylon A.,", "", "7,Ash,a@email.com"]
 
-    // Loop through vector and convert each record to Record type
-    for line in lines {
-        // === ORIGINAL ATTEMPT:
-        // Split the line by ','
-        let fields: Vec<&str> = line.split(',').collect();
-        // println!("fields= {:?}", fields); // fields= ["500", "Gonzalo Buxey", "gbuxeydv@dedecms.com"]
-        // NOTE Solution use 'if record != ""' instead
-        if fields.len() < 2 || fields.len() > 3 {
-            // TODO Return a custom error?
-            // Q: How to add/use these custom errors?
-            // A: Solution created separate parse_record(record: &str) -> Result<Record,
-            // ParseError> function to handle
-            continue
-        } else {
-            // FIXME Could make this validation more robust and custom errors
-            // NOTE Solution created separate parse_record(record: &str) -> Result<Record,
-            // ParseError> function to handle
-            // NOTE Vec types have the get() and get_mut() methods
-            // E.g., make sure id is_numeric, id and name are there, etc.
-            // Capture each field value
-            let id = fields.get(0).unwrap_or_else(|| &"id_default");
-            let name = fields.get(1).unwrap_or_else(|| &"name_default");
-            let email = fields.get(2).unwrap_or_else(|| &"email_default");
+    // // Loop through vector and convert each record to Record type
+    // for line in lines {
+    //     // === ORIGINAL ATTEMPT:
+    //     // Split the line by ','
+    //     let fields: Vec<&str> = line.split(',').collect();
+    //     // println!("fields= {:?}", fields); // fields= ["500", "Gonzalo Buxey", "gbuxeydv@dedecms.com"]
+    //     // NOTE Solution use 'if record != ""' instead
+    //     if fields.len() < 2 || fields.len() > 3 {
+    //         // TODO Return a custom error?
+    //         // Q: How to add/use these custom errors?
+    //         // A: Solution created separate parse_record(record: &str) -> Result<Record,
+    //         // ParseError> function to handle
+    //         continue
+    //     } else {
+    //         // FIXME Could make this validation more robust and custom errors
+    //         // NOTE Solution created separate parse_record(record: &str) -> Result<Record,
+    //         // ParseError> function to handle
+    //         // NOTE Vec types have the get() and get_mut() methods
+    //         // E.g., make sure id is_numeric, id and name are there, etc.
+    //         // Capture each field value
+    //         let id = fields.get(0).unwrap_or_else(|| &"id_default");
+    //         let name = fields.get(1).unwrap_or_else(|| &"name_default");
+    //         let email = fields.get(2).unwrap_or_else(|| &"email_default");
 
-            // Convert to Record type
-            let new_record: Record = Record {
-                id: id.to_string(),
-                name: name.to_string(),
-                email: Some(email.to_string()),
-            };
+    //         // Convert to Record type
+    //         let new_record: Record = Record {
+    //             id: id.to_string(),
+    //             name: name.to_string(),
+    //             email: Some(email.to_string()),
+    //         };
 
-            // Add this new record to our records_map
-            records_map.add(new_record);
-        }
-    }
+    //         // Add this new record to our records_map
+    //         records_map.add(new_record);
+    //     }
+    // }
 
     // Return complete RecordsMap
-    println!("Final parsed RecordsMap = {:?}", records_map);
+    // println!("Final parsed RecordsMap = {:?}", records_map);
     records_map
 }
 
@@ -181,7 +174,12 @@ fn parse_record(record: &str) -> Result<Record, ParseError> {
     // My original attempt used .get().unwrap_or_else(|| &"default_id")
     let id = match fields.get(0) {
         // Q: How to convert a &str to i64?
-        Some(id) => id.to_string(),
+        // A: Solution used i64::from_str_radix(id, 10)?
+        // A: Quite a few options: https://stackoverflow.com/questions/27043268/convert-a-string-to-int?rq=1
+        // Some(id) => id.to_string(),
+        // NOTE I need to ensure that my custom error impl the 'From' trait
+        // from the ParseIntError i.e.: #[from] std::num::ParseIntError
+        Some(id) => i64::from_str_radix(id, 10)?,
         // NOTE It's here that we can return early our custom error
         None => return Err(ParseError::EmptyRecord),
     };
@@ -207,39 +205,25 @@ fn parse_record(record: &str) -> Result<Record, ParseError> {
     };
 
     Ok(new_record)
-
 }
 
 fn main() {
 
-    // let record_one = Record { id: 1, name: "one".to_string(), email: None };
-    // let record_two = Record { id: 2, name: "two".to_string(), email: Some("two@email.com".to_owned()) };
-    // let record_three = Record { id: 3, name: "three".to_string(), email: Some("three@email.com".to_owned()) };
-
-    // Add our records into our new HashMap
-    // records.add(record_one);
-    // records.add(record_two);
-    // records.add(record_three);
-    // println!("{:?}", records);
-
-    // for (id, record) in records.inner.iter() {
-    //     println!("id = {:?}, name = {:?}, email = {:?}", id, record.name, record.email);
-    // }
 
     // Let's try to read our CSV file
     let file_path = PathBuf::from(r"src/bin/p2_data.csv");
-    load_records(file_path).expect("Unable to load records");
+    // Q: Where should I init the RecordsMap? Inside main?
+    // Challenge is I want to add, search contacts within the HM so
+    // need one to work with...
+    // let records = match load_records(file_path) {
+    //     Ok(records_map) => records_map,
+    //     Err(e) => println!("Unable to load file: {:?}", e),
+    // }; // ERROR Incompatible match arm types
+    // Q: Do I need to use match or can I just use expect()? I want to store
+    // a copy of the RecordsMap so I can add, find contacts, etc.
+    // A: This works but is there a better way?
+    let records = load_records(file_path).expect("Unable to load records"); // WORKS. Better way?
 
-
-    // == WORKS
-    // let mut file = File::open("./src/bin/foo.txt")?;
-    // let mut contents = String::new();
-    // file.read_to_string(&mut contents)?;
-    // assert_eq!(contents, "Hello, world!\n");
-    // Ok(())
-
-    // == Splitting a String by commas
-    // let x = "id,name,email".to_string();
-    // let v: Vec<&str> = x.split(',').collect();
-    // println!("{:?}", v);
+    let contact_id = "197";
+    records.get_contact_by_id(contact_id);
 }
