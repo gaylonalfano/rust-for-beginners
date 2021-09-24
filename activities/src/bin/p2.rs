@@ -34,6 +34,32 @@ use std::path::PathBuf;
 use std::io::prelude::*;
 use std::collections::HashMap;
 use thiserror::Error;
+use structopt::StructOpt;
+
+
+// NOTE To use StructOpt CLI we're going to need one struct + one enum:
+// struct to handle standard options
+// enum to handle each command given to the program
+/// A basic example
+#[derive(StructOpt, Debug)]
+#[structopt(name = "contacts", about = "project 2: Contact Manager")]
+struct Opt {
+    /// Set file_path
+    #[structopt(short, parse(from_os_str), default_value = "src/bin/p2_data.csv")]
+    file_path: PathBuf,
+
+    #[structopt(subcommand)]
+    cmd: Command,
+}
+
+// NOTE subcommands have to be structures (e.g., List {})
+#[derive(StructOpt, Debug)]
+enum Command {
+    List {
+
+    },
+}
+
 
 // NOTE Creating a custom struct that WRAPS a HashMap. We want to store data in HashMap,
 // but we don't want to pass around the HashMap to all our functions. Better approach is
@@ -162,7 +188,7 @@ fn parse_records(records: String) -> RecordsMap {
     // }
 
     // Return complete RecordsMap
-    // println!("Final parsed RecordsMap = {:?}", records_map);
+    println!("Final parsed RecordsMap = {:?}", records_map);
     records_map
 }
 
@@ -172,6 +198,10 @@ fn parse_record(record: &str) -> Result<Record, ParseError> {
 
     // NOTE Use the Vec.get() method but along w/ match since get() -> Option
     // My original attempt used .get().unwrap_or_else(|| &"default_id")
+    // IMPORTANT Assigning variables using multiple expressions (like below) is
+    // a good practice. We're giving it a couple places to fail before finally
+    // assigning our variable a value. This makes it more robust. When you
+    // use expressions, this allows the compiler to check all possible use cases.
     let id = match fields.get(0) {
         // Q: How to convert a &str to i64?
         // A: Solution used i64::from_str_radix(id, 10)?
@@ -179,8 +209,9 @@ fn parse_record(record: &str) -> Result<Record, ParseError> {
         // Some(id) => id.to_string(),
         // NOTE I need to ensure that my custom error impl the 'From' trait
         // from the ParseIntError i.e.: #[from] std::num::ParseIntError
+        // NOTE These are TWO different error types!
         Some(id) => i64::from_str_radix(id, 10)?,
-        // NOTE It's here that we can return early our custom error
+        // NOTE It's here that we can return early our custom error.
         None => return Err(ParseError::EmptyRecord),
     };
 
@@ -192,7 +223,9 @@ fn parse_record(record: &str) -> Result<Record, ParseError> {
         None => return Err(ParseError::MissingRequiredField),
     };
 
-    // NOTE Solution used .get().map(|e| e.to_string()).filter(|e| e != "");
+    // NOTE Solution used fields.get(2).map(|e| e.to_string()).filter(|e| e != "");
+    // The difference between approaches is that the solution will return None
+    // instead of an empty string for the 'email' field.
     // I still need to handle getting email into a String type for Record struct
     let email = fields.get(2).unwrap_or_else(|| &"").to_string();
     // let email = fields.get(2).map(|e| e.to_string()).filter(|e| e != "");
@@ -207,23 +240,45 @@ fn parse_record(record: &str) -> Result<Record, ParseError> {
     Ok(new_record)
 }
 
+fn run(opt: Opt) -> Result<(), std::io::Error> {
+    match opt.cmd {
+        // NOTE Have to use struct pattern syntax ie. Command::List {}
+        // Can't simply use struct variant ie. Command::List =>
+        // NOTE To ignore everything inside the List we use 'List { .. }' syntax
+        Command::List {..} => {
+            let records = load_records(opt.file_path)?;
+            println!("records={:?}", records);
+        }
+    }
+    Ok(())
+}
+
 fn main() {
 
 
-    // Let's try to read our CSV file
-    let file_path = PathBuf::from(r"src/bin/p2_data.csv");
-    // Q: Where should I init the RecordsMap? Inside main?
-    // Challenge is I want to add, search contacts within the HM so
-    // need one to work with...
-    // let records = match load_records(file_path) {
-    //     Ok(records_map) => records_map,
-    //     Err(e) => println!("Unable to load file: {:?}", e),
-    // }; // ERROR Incompatible match arm types
-    // Q: Do I need to use match or can I just use expect()? I want to store
-    // a copy of the RecordsMap so I can add, find contacts, etc.
-    // A: This works but is there a better way?
-    let records = load_records(file_path).expect("Unable to load records"); // WORKS. Better way?
+    // // === BEFORE adding StructOpt CLI
+    // // Let's try to read our CSV file
+    // let file_path = PathBuf::from(r"src/bin/p2_data.csv");
+    // // Q: Where should I init the RecordsMap? Inside main?
+    // // Challenge is I want to add, search contacts within the HM so
+    // // need one to work with...
+    // // let records = match load_records(file_path) {
+    // //     Ok(records_map) => records_map,
+    // //     Err(e) => println!("Unable to load file: {:?}", e),
+    // // }; // ERROR Incompatible match arm types
+    // // Q: Do I need to use match or can I just use expect()? I want to store
+    // // a copy of the RecordsMap so I can add, find contacts, etc.
+    // // A: This works but is there a better way?
+    // let records = load_records(file_path).expect("Unable to load records"); // WORKS. Better way?
 
-    let contact_id = "197";
-    records.get_contact_by_id(contact_id);
+    // let contact_id = "197";
+    // records.get_contact_by_id(contact_id);
+
+
+    // === AFTER adding StructOpt CLI
+    let opt = Opt::from_args();
+    if let Err(e) = run(opt) {
+        println!("An error occurred: {:?}", e);
+    }
+
 }

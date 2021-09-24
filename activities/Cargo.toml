@@ -10,3 +10,4 @@ edition = "2018"
 humantime = "2.1.0" # For a26
 chrono = "0.4.19" # For a26
 thiserror = "1.0.29"
+structopt = "0.3.23" # p2
