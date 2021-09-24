@@ -52,12 +52,10 @@ struct Opt {
     cmd: Command,
 }
 
-// NOTE subcommands have to be structures (e.g., List {})
 #[derive(StructOpt, Debug)]
 enum Command {
-    List {
-
-    },
+    // NOTE subcommands have to be structures (e.g., List {})
+    List {},
 }
 
 
@@ -88,6 +86,18 @@ impl RecordsMap {
             Some(record) => println!("record={:?}",record),
             None => println!("Contact not found"),
         }
+    }
+
+    fn into_vec(mut self) -> Vec<Record> {
+        // NOTE This completely converts the RecordsMap struct into a Vec
+        // so that we can sort. After using this, our struct
+        // will no longer be available since we move it completely: mut self
+        // NOTE There is a handy HM.drain() method. We use a map closure
+        // to only grab the actual Record ie |kv| kv.1 where kv is a Tuple
+        let mut records: Vec<_> = self.inner.drain().map(|kv| kv.1).collect();
+        // NOTE There's also a handy Tuple.sort_by_key() method
+        records.sort_by_key(|r| r.id);
+        records
     }
 }
 
@@ -215,7 +225,9 @@ fn parse_record(record: &str) -> Result<Record, ParseError> {
         None => return Err(ParseError::EmptyRecord),
     };
 
-    let name = match fields.get(1) {
+    // NOTE Without chaining the .filter() we end up with records that
+    // contain an empty string. Better to remove them from final list
+    let name = match fields.get(1).filter(|n| **n != "") {
         // Q: What's the difference between to_owned() vs to_string()?
         // Only when I use to_string() does it not error...
         Some(name) => name.to_string(), // Error if I use to_owned()
@@ -246,8 +258,16 @@ fn run(opt: Opt) -> Result<(), std::io::Error> {
         // Can't simply use struct variant ie. Command::List =>
         // NOTE To ignore everything inside the List we use 'List { .. }' syntax
         Command::List {..} => {
-            let records = load_records(opt.file_path)?;
-            println!("records={:?}", records);
+            let records_map = load_records(opt.file_path)?;
+            // UPDATE Now drain() and convert to Vec for sorted list
+            // let records_vec = records_map.into_vec();
+            // NOTE The into_vec() method completely drops our RecordsMap
+            // So can no longer access after we run it!
+            // println!("records={:?}", records_vec); // Works
+            // NOTE Solution used: 'for record in records_map.into_vec() { ... }'
+            for record in records_map.into_vec() {
+                println!("record={:?}", record);
+            }
         }
     }
     Ok(())
