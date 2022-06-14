@@ -43,6 +43,31 @@ fn main() {
 //     1 => "hello",
 //     _ => "goodbye"
 // };
+// // Shorthand
+// // NOTE The expression is: my_num < 5
+// let is_lt_5 = my_num < 5;
+
+// // Nesting
+// enum Menu {
+//     Burger,
+//     Fries,
+//     Drink,
+// }
+
+// let paid = true;
+// let item = Menu::Drink;
+// let drink_type = "water";
+// let order_placed = match item {
+//     Menu::Drink => {
+//         if drink_type == "water" {
+//             true
+//         } else {
+//             false
+//         }
+//     }
+//     _ => true,
+// };
+
 
 // DEMO
 // enum Access {

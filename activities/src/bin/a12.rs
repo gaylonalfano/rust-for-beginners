@@ -10,100 +10,100 @@
 // * Implement functionality on the box struct to create a new box
 // * Implement functionality on the box struct to print the characteristics
 
-// * Use an enum for the box color
-enum BoxColor {
-    Red,
-    Blue,
-    Green,
-}
+// // * Use an enum for the box color
+// enum BoxColor {
+//     Red,
+//     Blue,
+//     Green,
+// }
 
-// Use impl to implement functionality for BoxColor
-impl BoxColor {
-    fn print(&self) {
-        // NOTE Use match!
-        match self {
-            BoxColor::Red => println!("red"),
-            BoxColor::Blue => println!("blue"),
-            BoxColor::Green => println!("green"),
-        }
-    }
-}
+// // Use impl to implement functionality for BoxColor
+// impl BoxColor {
+//     fn print(&self) {
+//         // NOTE Use match!
+//         match self {
+//             BoxColor::Red => println!("red"),
+//             BoxColor::Blue => println!("blue"),
+//             BoxColor::Green => println!("green"),
+//         }
+//     }
+// }
 
-struct BoxDimensions {
-    width: f64,
-    height: f64,
-    depth: f64,
-}
+// struct BoxDimensions {
+//     width: f64,
+//     height: f64,
+//     depth: f64,
+// }
 
-impl BoxDimensions {
-    // NOTE &self refers to a BoxDimensions created elsewhere (unlike Self)
-    fn print(&self) {
-        println!("width: {:?}", self.width);
-        println!("height: {:?}", self.height);
-        println!("depth: {:?}", self.depth);
-    }
-}
-
-
-// * Use a struct to encapsulate the box characteristics
-struct Box {
-    weight: f64,
-    // color: match BoxColor {
-    //     BoxColor::Red => println!("red"),
-    //     BoxColor::Blue => println!("blue"),
-    //     BoxColor::Green => println!("green"),
-    // }
-    color: BoxColor,
-    dimensions: BoxDimensions
-}
+// impl BoxDimensions {
+//     // NOTE &self refers to a BoxDimensions created elsewhere (unlike Self)
+//     fn print(&self) {
+//         println!("width: {:?}", self.width);
+//         println!("height: {:?}", self.height);
+//         println!("depth: {:?}", self.depth);
+//     }
+// }
 
 
-impl Box {
-    // NOTE Should use new() per conventions
-    fn new(weight: f64, color: BoxColor, dimensions: BoxDimensions) -> Self {
-        Self {
-            weight,
-            color,
-            dimensions,
-        }
-    }
+// // * Use a struct to encapsulate the box characteristics
+// struct Box {
+//     weight: f64,
+//     // color: match BoxColor {
+//     //     BoxColor::Red => println!("red"),
+//     //     BoxColor::Blue => println!("blue"),
+//     //     BoxColor::Green => println!("green"),
+//     // }
+//     color: BoxColor,
+//     dimensions: BoxDimensions
+// }
 
 
-    // * Implement functionality on the box struct to create a new box
-    // My Attempt
-    // fn create_green_box() -> Self {
-    //     Self {
-    //         weight: 22.0,
-    //         color: BoxColor::Green,
-    //         dimensions: Dimensions {
-    //             width: 5.2,
-    //             height: 8.4,
-    //             depth: 10.0,
-    //         }
-    //     }
-    // }
-    // * Implement functionality on the box struct to print the characteristics
-    fn print(&self) {
-        println!("weight = {:?}", self.weight);
-        // NOTE Shouldn't use println macro when calling custom print() functions
-        // println!("dimensions = {:?}", self.dimensions.print());
-        // println!("color = {:?}", self.color.print());
-        self.dimensions.print();
-        self.color.print();
-    }
-}
+// impl Box {
+//     // NOTE Should use new() per conventions
+//     fn new(weight: f64, color: BoxColor, dimensions: BoxDimensions) -> Self {
+//         Self {
+//             weight,
+//             color,
+//             dimensions,
+//         }
+//     }
 
-fn main() {
-    // NOTE Gotta first create BoxDimensions before creating a new Box
-    let small_dimensions = BoxDimensions {
-        width: 5.2,
-        height: 8.4,
-        depth: 10.0,
-    };
 
-    let small_box = Box::new(9.2, BoxColor::Blue, small_dimensions);
-    small_box.print();
-}
+//     // * Implement functionality on the box struct to create a new box
+//     // My Attempt
+//     // fn create_green_box() -> Self {
+//     //     Self {
+//     //         weight: 22.0,
+//     //         color: BoxColor::Green,
+//     //         dimensions: Dimensions {
+//     //             width: 5.2,
+//     //             height: 8.4,
+//     //             depth: 10.0,
+//     //         }
+//     //     }
+//     // }
+//     // * Implement functionality on the box struct to print the characteristics
+//     fn print(&self) {
+//         println!("weight = {:?}", self.weight);
+//         // NOTE Shouldn't use println macro when calling custom print() functions
+//         // println!("dimensions = {:?}", self.dimensions.print());
+//         // println!("color = {:?}", self.color.print());
+//         self.dimensions.print();
+//         self.color.print();
+//     }
+// }
+
+// fn main() {
+//     // NOTE Gotta first create BoxDimensions before creating a new Box
+//     let small_dimensions = BoxDimensions {
+//         width: 5.2,
+//         height: 8.4,
+//         depth: 10.0,
+//     };
+
+//     let small_box = Box::new(9.2, BoxColor::Blue, small_dimensions);
+//     small_box.print();
+// }
 
 
 // // DEMO
@@ -154,3 +154,55 @@ fn main() {
 //     boiling.show_temp();
 //     boiling.show_temp();
 // }
+
+
+// Requirements:
+// * Print the characteristics of a shipping box
+// * Must include dimensions, weight, and color
+//
+// Notes:
+// * Use a struct to encapsulate the box characteristics
+#[derive(Debug)]
+struct Box {
+    weight: f64,
+    dimensions: BoxDimensions,
+    color: BoxColor
+}
+
+#[derive(Debug)]
+struct BoxDimensions {
+    length: f64,
+    width: f64,
+    height: f64
+}
+// * Use an enum for the box color
+#[derive(Debug)]
+enum BoxColor {
+    Brown,
+    White,
+    Black,
+}
+
+// * Implement functionality on the box struct to create a new box
+impl Box {
+    fn new(weight: f64, dimensions: BoxDimensions, color: BoxColor) -> Self {
+        Self {
+            weight,
+            dimensions,
+            color
+        }
+    }
+
+    fn print_box_details(&self) {
+        println!("details: {:?}", self)
+    }
+}
+
+// * Implement functionality on the box struct to print the characteristics
+
+fn main() {
+    let brown_box = Box::new(11.2, BoxDimensions { length: 4.0, width: 2.0, height: 8.0 }, BoxColor::Brown);
+    // println!("{:?}", brown_box);
+    brown_box.print_box_details();
+}
+

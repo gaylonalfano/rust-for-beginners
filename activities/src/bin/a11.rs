@@ -10,32 +10,32 @@
 // * Create a function to display the id number, with the struct as a parameter
 
 
-// * Use a struct for the grocery item
-struct GroceryItem {
-    // * Use two i32 fields for the quantity and id number
-    quantity: i32,
-    id: i32,
-}
+// // * Use a struct for the grocery item
+// struct GroceryItem {
+//     // * Use two i32 fields for the quantity and id number
+//     quantity: i32,
+//     id: i32,
+// }
 
-// * Create a function to display the quantity, with the struct as a parameter
-fn display_quantity(item: &GroceryItem) {
-    println!("quantity = {:?}", item.quantity);
-}
+// // * Create a function to display the quantity, with the struct as a parameter
+// fn display_quantity(item: &GroceryItem) {
+//     println!("quantity = {:?}", item.quantity);
+// }
 
-// * Create a function to display the id number, with the struct as a parameter
-fn display_id(item: &GroceryItem) {
-    println!("id = {:?}", item.id);
-}
+// // * Create a function to display the id number, with the struct as a parameter
+// fn display_id(item: &GroceryItem) {
+//     println!("id = {:?}", item.id);
+// }
 
-fn main() {
-    let pringles = GroceryItem {
-        quantity: 12,
-        id: 2,
-    };
+// fn main() {
+//     let pringles = GroceryItem {
+//         quantity: 12,
+//         id: 2,
+//     };
 
-    display_quantity(&pringles);
-    display_id(&pringles);
-}
+//     display_quantity(&pringles);
+//     display_id(&pringles);
+// }
 
 // DEMO
 // struct Book {
@@ -69,3 +69,43 @@ fn main() {
 //     display_page_count(&book);
 //     display_rating(&book);
 // }
+
+
+// Requirements:
+// * Print out the quantity and id number of a grocery item
+//
+// Notes:
+// * Use a struct for the grocery item
+// * Use two i32 fields for the quantity and id number
+// * Create a function to display the quantity, with the struct as a parameter
+// * Create a function to display the id number, with the struct as a parameter
+
+struct GroceryItem {
+    id: i32,
+    quantity: i32
+}
+
+fn display_item_quantity(item: &GroceryItem) {
+    println!("quantity: {:?}", item.quantity);
+}
+
+fn display_item_id(item: &GroceryItem) {
+    println!("id: {:?}", item.id);
+}
+
+fn main() {
+    let soda = GroceryItem {
+        id: 1,
+        quantity: 30
+    };
+
+    let crispix = GroceryItem {
+        id: 2,
+        quantity: 12
+    };
+
+    display_item_id(&soda);
+    display_item_quantity(&soda);
+    display_item_id(&crispix);
+    display_item_quantity(&crispix);
+}

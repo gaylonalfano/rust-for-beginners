@@ -11,10 +11,19 @@
 // * Do not use break to exit the loop
 
 fn main() {
-    let mut i = 5;
-    while i > 0 {
-        println!("Count down: {:?}", i);
-        i = i - 1;
+    let mut counter = 5;
+    while counter > 0 {
+        println!("{:?}", counter);
+        counter = counter - 1;
     }
-    println!("Done!");
+    println!("Done!")
 }
+
+// fn main() {
+//     let mut i = 5;
+//     while i > 0 {
+//         println!("Count down: {:?}", i);
+//         i = i - 1;
+//     }
+//     println!("Done!");
+// }

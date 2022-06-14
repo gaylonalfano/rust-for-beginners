@@ -99,6 +99,15 @@ impl RecordsMap {
         records.sort_by_key(|r| r.id);
         records
     }
+
+    fn compute_next_id(&self) -> i64 {
+        // Helper function to get the next id number to assign to new Record
+        // TODO
+        // Find out the current last key value number in this HM
+        // Convert that string to a i64
+        // Compute the next id value by +1 and return it
+
+    }
 }
 
 #[derive(Debug)]
