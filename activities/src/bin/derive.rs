@@ -8,6 +8,8 @@
 // two separate copies inside the heap where ownership matters).
 // - Copy (stack-only data) is only for simple scalar values known
 // at compile time (u32, bool, f64, char, tuples (if items are scalar too))
+// NOTE Typically only use Clone, Copy on small enums and structs, otherwise get a lot of copies
+// created in your program
 
 // Example 1 - Enums can hold variants that also has associated data.
 enum Mouse {

@@ -130,41 +130,82 @@
 // * Use a struct containing the student's name and locker assignment
 // * The locker assignment should use an Option<i32>
 
-struct StudentLocker {
+// struct StudentLocker {
+//     name: String,
+//     locker: Option<i32>,
+// }
+
+// fn main() {
+//     let student_lockers: Vec<StudentLocker> = vec![
+//         // NOTE .to_string(), to_owned() and String::from() all seem to return String
+//         // Recall that string literals (ie string slices) are &str so need to convert
+//         StudentLocker {
+//             name: "peach".to_string(),
+//             locker: Some(1),
+//         },
+//         StudentLocker {
+//             name: String::from("boo"),
+//             locker: Some(2),
+//         },
+//         StudentLocker {
+//             name: "bowser".to_owned(),
+//             locker: Some(3),
+//         },
+//         StudentLocker {
+//             name: "mario".to_owned(),
+//             locker: None,
+//         },
+//     ];
+
+//     for student in student_lockers {
+//         // println!("{:?}'s locker is {:?}", student.name, student.locker); // Some(1)
+//         match student.locker {
+//             Some(num) => println!(
+//                 "{:?}'s locker is {:?} ({:?})",
+//                 student.name, num, student.locker
+//             ),
+//             None => println!("{:?} has no locker assigned", student.name),
+//         }
+//     }
+// }
+
+
+
+// Requirements:
+// * Print out the details of a student's locker assignment
+// * Lockers use numbers and are optional for students
+//
+// Notes:
+// * Use a struct containing the student's name and locker assignment
+// * The locker assignment should use an Option<i32>
+#[derive(Debug)]
+struct Student {
     name: String,
-    locker: Option<i32>,
+    locker: Option<i32>
 }
 
 fn main() {
-    let student_lockers: Vec<StudentLocker> = vec![
-        // NOTE .to_string(), to_owned() and String::from() all seem to return String
-        // Recall that string literals (ie string slices) are &str so need to convert
-        StudentLocker {
-            name: "peach".to_string(),
-            locker: Some(1),
+    let students = vec![
+        Student {
+            name: "Peach".to_owned(),
+            locker: Some(001),
         },
-        StudentLocker {
-            name: String::from("boo"),
-            locker: Some(2),
-        },
-        StudentLocker {
-            name: "bowser".to_owned(),
-            locker: Some(3),
-        },
-        StudentLocker {
-            name: "mario".to_owned(),
+        Student {
+            name: String::from("Bowser"),
             locker: None,
         },
+        Student {
+            name: "Toad".to_owned(),
+            locker: Some(002),
+        }
     ];
 
-    for student in student_lockers {
-        // println!("{:?}'s locker is {:?}", student.name, student.locker); // Some(1)
+    for student in students {
         match student.locker {
-            Some(num) => println!(
-                "{:?}'s locker is {:?} ({:?})",
-                student.name, num, student.locker
-            ),
-            None => println!("{:?} has no locker assigned", student.name),
+            Some(num) => println!("{:?} has locker number {:?}", student, num),
+            None => println!("{:?} has no locker assigned.", student.name)
         }
     }
+
 }
+
