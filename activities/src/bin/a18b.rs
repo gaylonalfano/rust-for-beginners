@@ -168,14 +168,14 @@ impl Employee {
     }
 }
 
-fn try_status(employee: &Employee) -> Result<(), String> {
+fn has_valid_status(employee: &Employee) -> Result<(), String> {
     match employee.status {
         Status::Active => Ok(()),
         Status::Terminated => Err(String::from("Status is terminated")),
     }
 }
 
-fn try_position(employee: &Employee) -> Result<(), String> {
+fn has_valid_position(employee: &Employee) -> Result<(), String> {
     match employee.position {
         Position::Maintenance => Ok(()),
         Position::Manager => Ok(()),
@@ -184,7 +184,7 @@ fn try_position(employee: &Employee) -> Result<(), String> {
     }
 }
 
-fn try_age(employee: &Employee) -> Result<(), String> {
+fn has_valid_age(employee: &Employee) -> Result<(), String> {
     // Q: How to match on integer values/ranges?
     // A: Use if/else instead or use match guards!
     // https://stackoverflow.com/questions/47852269/can-i-use-and-in-match
@@ -199,13 +199,13 @@ fn try_age(employee: &Employee) -> Result<(), String> {
     }
 }
 
-fn try_access(employee: &Employee) -> Result<(), String> {
+fn can_access(employee: &Employee) -> Result<(), String> {
     // Check whether the employee's position is authorized or
     // return the Err() variant
     // == WITH helpers + ? operator:
-    try_status(employee)?;
-    try_position(employee)?;
-    try_age(employee)?;
+    has_valid_status(employee)?;
+    has_valid_position(employee)?;
+    has_valid_age(employee)?;
     // NOTE Must finally return Ok(()), not just inner () unit type
     Ok(())
 
@@ -249,11 +249,85 @@ fn main() {
     let sandy = Employee::new("sandy", Status::Active, Position::KitchenStaff, 16);
     let piper = Employee::new("piper", Status::Terminated, Position::LineSupervisor, 18);
     let stu = Employee::new("stu", Status::Active, Position::Maintenance, 17);
+    let bill = Employee::new("bill", Status::Active, Position::AssemblyTechnician, 22);
 
-    let employees = vec![carl, max, sandy, piper, stu];
+    let employees = vec![carl, max, sandy, piper, stu, bill];
 
     for e in employees {
-        let access = try_access(&e);
+        let access = can_access(&e);
         println!("{:?}", access);
     }
 }
+
+// // === MY ATTEMPT #2
+// // Requirements:
+// // * Determine if an employee can access a building using a digital keycard
+// // * Employees that can access the building are:
+// //   * Maintenance crews
+// //   * Marketing department employees
+// //   * Managers
+// // * Other employees that work at the company are:
+// //   * Line supervisors
+// //   * Kitchen staff
+// //   * Assembly technicians
+// // * Ensure that terminated employees cannot access the building
+// //   regardless of their position
+// enum Status {
+//     Active,
+//     Terminated
+// }
+
+// enum Position {
+//     Maintenance,
+//     Marketing,
+//     Manager,
+//     LineSupervisor,
+//     KitchenStaff,
+//     AssemblyTechnician
+// }
+
+// struct Employee {
+//     name: String,
+//     status: Status,
+//     position: Position
+// }
+
+// fn has_valid_status(status: &Status) -> Result<(), String> {
+//     match status {
+//         Status::Active => Ok(()),
+//         Status::Terminated => Err("Status is terminated".to_owned())
+//     }
+// }
+
+// fn has_valid_position(position: &Position) -> Result<(), String> {
+//     match position {
+//         Position::Maintenance => Ok(()),
+//         Position::Marketing => Ok(()),
+//         Position::Manager => Ok(()),
+//         Position::LineSupervisor => Err("Line Supervisor does not have access.".to_owned()),
+//         Position::KitchenStaff => Err("Kitchen staff does not have access.".to_owned()),
+//         Position::AssemblyTechnician => Err("Assembly Technician does not have access.".to_owned()),
+//     }
+// }
+
+// fn can_access(employee: &Employee) -> Result<(), String> {
+//     has_valid_status(&employee.status)?;
+//     has_valid_position(&employee.position)?;
+//     Ok(())
+// }
+
+// fn main() {
+//     let cloud = Employee {
+//         name: String::from("Cloud"),
+//         status: Status::Active,
+//         position: Position::Manager
+//     };
+
+//     let has_access = can_access(&cloud);
+
+//     match has_access {
+//         Ok(_) => println!("Employee has access."),
+//         Err(e) => println!("{:?}", e)
+//     }
+// }
+
