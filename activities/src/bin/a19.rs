@@ -88,44 +88,44 @@
 //     }
 // }
 
-// Topic: HashMap
-//
-// Requirements:
-// * Print the name and number of items in stock for a furniture store
-// * If the number of items is 0, print "out of stock" instead of 0
-// * The store has:
-//   * 5 Chairs
-//   * 3 Beds
-//   * 2 Tables
-//   * 0 Couches
-// * Print the total number of items in stock
-//
-// Notes:
-// * Use a HashMap for the furniture store stock
-use std::collections::HashMap;
+//// Topic: HashMap
+////
+//// Requirements:
+//// * Print the name and number of items in stock for a furniture store
+//// * If the number of items is 0, print "out of stock" instead of 0
+//// * The store has:
+////   * 5 Chairs
+////   * 3 Beds
+////   * 2 Tables
+////   * 0 Couches
+//// * Print the total number of items in stock
+////
+//// Notes:
+//// * Use a HashMap for the furniture store stock
+//use std::collections::HashMap;
 
-// === MY ATTEMPT
-fn main() {
-    let mut inventory = HashMap::new();
-    inventory.insert("Chair", 5);
-    inventory.insert("Bed", 3);
-    inventory.insert("Table", 2);
-    inventory.insert("Couch", 0);
+//// === MY ATTEMPT
+//fn main() {
+//    let mut inventory = HashMap::new();
+//    inventory.insert("Chair", 5);
+//    inventory.insert("Bed", 3);
+//    inventory.insert("Table", 2);
+//    inventory.insert("Couch", 0);
 
-    for (item, quantity) in inventory.iter() {
-        // NOTE inventory quantity is a borrowed reference so need to dereference to get raw int:int comparison
-        if *quantity == 0 {
-            println!("{:?} is out of stock!", item);
-        } else {
-            println!("item = {:?}, stock = {:?}", item, quantity);
-        }
-    }
+//    for (item, quantity) in inventory.iter() {
+//        // NOTE inventory quantity is a borrowed reference so need to dereference to get raw int:int comparison
+//        if *quantity == 0 {
+//            println!("{:?} is out of stock!", item);
+//        } else {
+//            println!("item = {:?}, stock = {:?}", item, quantity);
+//        }
+//    }
 
-    let total_items = inventory.keys().len();
-    println!("total items = {:?}", total_items);
-    let total_quantity: i32 = inventory.values().sum();
-    println!("total quantity = {:?}", total_quantity);
-}
+//    let total_items = inventory.keys().len();
+//    println!("total items = {:?}", total_items);
+//    let total_quantity: i32 = inventory.values().sum();
+//    println!("total quantity = {:?}", total_quantity);
+//}
 
 // === SOLUTION
 // fn main() {
@@ -154,3 +154,40 @@ fn main() {
 //     println!("total stock = {:?}", total_stock);
 //     println!("total quantity = {:?}", total_quantity);
 // }
+
+// === Activity 2nd attempt
+// Topic: HashMap
+//
+// Requirements:
+// * Print the name and number of items in stock for a furniture store
+// * If the number of items is 0, print "out of stock" instead of 0
+// * The store has:
+//   * 5 Chairs
+//   * 3 Beds
+//   * 2 Tables
+//   * 0 Couches
+// * Print the total number of items in stock
+//
+// Notes:
+// * Use a HashMap for the furniture store stock
+use std::collections::HashMap;
+
+fn main() {
+    let mut inventory = HashMap::new();
+    inventory.insert("chairs", 5);
+    inventory.insert("beds", 3);
+    inventory.insert("tables", 2);
+    inventory.insert("couches", 0);
+
+    let mut total_quantity = 0;
+    for (&item, &qty) in inventory.iter() {
+        total_quantity += qty;
+
+        if qty <= 0 {
+            println!("{:?} is out of stock.", item)
+        } else {
+            println!("{:?} {:?} left.", qty, item)
+        }
+    }
+    println!("Total quantity={:?}", total_quantity);
+}
