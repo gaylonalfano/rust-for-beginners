@@ -34,6 +34,8 @@
 //     Sleep,
 // }
 
+// NOTE Instructor chose to use impl with new() to handle converting &str to enum. In my solution,
+// I created a helper instead: convert_input_to_state()
 // impl PowerState {
 //     fn new(state: &str) -> Option<PowerState> {
 //         // Confirm that user input is lowercase to help with match
