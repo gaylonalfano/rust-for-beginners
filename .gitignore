@@ -1,4 +1,10 @@
+activities-solutions.zip
+activities.zip
 ./DS_Store
 ./.DS_Store
 DS_Store
-
+activities/.DS_Store
+activities/target
+rust-book/target
+rust-tutorials-coding-and-crypto/blockchain-info-app/target
+rust-tutorials-coding-and-crypto/send-bitcoin/target
