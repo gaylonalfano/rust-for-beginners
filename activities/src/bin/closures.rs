@@ -7,8 +7,6 @@
 // - Also used for passing a function as another function's parameter.
 // This is referred as a "Function Combinators".
 
-
-
 fn add_fn(a: i32, b: i32) -> i32 {
     a + b
 }
@@ -17,9 +15,7 @@ fn main() {
     let sum = add(1, 1);
 
     // === Closure VERBOSE
-    let add = |a: i32, b: i32| -> i32 {
-        a + b
-    }
+    let add = |a: i32, b: i32| -> i32 { a + b };
     // Then, you can call the Closure like a regular fn!
     // let sum = add(1, 1);
 

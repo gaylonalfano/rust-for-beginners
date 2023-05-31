@@ -2,7 +2,7 @@
 //
 // === NOTES:
 // Two common used types of strings:
-// String - owned
+//https://github.com/akinsho/toggleterm.nvim#setup String - owned
 // &str - borrowed String slice ("string slice")
 // Must use an owned String to store in a struct -- Currently CAN'T
 // store a slice in a struct.
@@ -20,7 +20,6 @@
 // * Iterate through the vector using a for..in loop
 // * Use an if expression to determine which person's info should be printed
 // * The name and colors should be printed using a function
-
 
 // * Use a struct for a persons age, name, and favorite color
 // struct Person {
@@ -71,7 +70,6 @@
 //     }
 // }
 
-
 // === DEMO
 // struct LineItem {
 //     name: String, // Item name
@@ -98,7 +96,6 @@
 //         println!("count = {:?}", item.count);
 //     }
 // }
-
 
 // === EXAMPLE - Pass string data to a function
 // fn print_it(data: &str) {
@@ -128,7 +125,7 @@
 //     // let emp = Employee {
 //     //     name: emp_name
 //     // };
-//     // SOLUTION Scenario 
+//     // SOLUTION Scenario
 //     // Inside the struct you can change type from &str to String
 //     // let emp_name = "Gaylon".to_owned();
 //     let emp_name = String::from("Gaylon");
@@ -141,7 +138,6 @@
 //     };
 // }
 
-
 // Requirements:
 // * Print out the name and favorite colors of people aged 10 and under
 //
@@ -151,7 +147,7 @@
 struct Person {
     age: i32,
     name: String,
-    color: String
+    color: String,
 }
 
 // * The name and colors should be printed using a function
@@ -168,24 +164,23 @@ fn print(data: &str) {
     println!("{:?}", data);
 }
 
-
 fn main() {
     // * Create and store at least 3 people in a vector
     let peeps = vec![
         Person {
             age: 8,
             name: "Archie".to_owned(),
-            color: String::from("Yellow")
+            color: String::from("Yellow"),
         },
         Person {
             age: 9,
             name: "Aaron".to_owned(),
-            color: String::from("Black")
+            color: String::from("Black"),
         },
         Person {
             age: 11,
             name: "Adrian".to_owned(),
-            color: String::from("Blue")
+            color: String::from("Blue"),
         },
     ];
 
@@ -200,4 +195,3 @@ fn main() {
         }
     }
 }
-

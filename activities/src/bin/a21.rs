@@ -34,10 +34,22 @@ fn find_user(name: &str) -> Option<i32> {
 }
 
 fn main() {
-    let sam = find_user("sam").map(|id| User { user_id: id, name: "sam".to_owned()});
-    let matt = find_user("matt").map(|id| User { user_id: id, name: "matt".to_owned()});
-    let katie = find_user("katie").map(|id| User { user_id: id, name: "katie".to_owned()});
-    let mario = find_user("mario").map(|id| User { user_id: id, name: "mario".to_owned()});
+    let sam = find_user("sam").map(|id| User {
+        user_id: id,
+        name: "sam".to_owned(),
+    });
+    let matt = find_user("matt").map(|id| User {
+        user_id: id,
+        name: "matt".to_owned(),
+    });
+    let katie = find_user("katie").map(|id| User {
+        user_id: id,
+        name: "katie".to_owned(),
+    });
+    let mario = find_user("mario").map(|id| User {
+        user_id: id,
+        name: "mario".to_owned(),
+    });
 
     let users = vec![sam, matt, katie, mario];
 

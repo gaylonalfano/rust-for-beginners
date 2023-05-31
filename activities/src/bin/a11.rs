@@ -9,7 +9,6 @@
 // * Create a function to display the quantity, with the struct as a parameter
 // * Create a function to display the id number, with the struct as a parameter
 
-
 // // * Use a struct for the grocery item
 // struct GroceryItem {
 //     // * Use two i32 fields for the quantity and id number
@@ -70,7 +69,6 @@
 //     display_rating(&book);
 // }
 
-
 // Requirements:
 // * Print out the quantity and id number of a grocery item
 //
@@ -82,7 +80,7 @@
 
 struct GroceryItem {
     id: i32,
-    quantity: i32
+    quantity: i32,
 }
 
 fn display_item_quantity(item: &GroceryItem) {
@@ -96,12 +94,12 @@ fn display_item_id(item: &GroceryItem) {
 fn main() {
     let soda = GroceryItem {
         id: 1,
-        quantity: 30
+        quantity: 30,
     };
 
     let crispix = GroceryItem {
         id: 2,
-        quantity: 12
+        quantity: 12,
     };
 
     display_item_id(&soda);

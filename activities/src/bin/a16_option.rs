@@ -169,8 +169,6 @@
 //     }
 // }
 
-
-
 // Requirements:
 // * Print out the details of a student's locker assignment
 // * Lockers use numbers and are optional for students
@@ -181,7 +179,7 @@
 #[derive(Debug)]
 struct Student {
     name: String,
-    locker: Option<i32>
+    locker: Option<i32>,
 }
 
 fn main() {
@@ -197,15 +195,16 @@ fn main() {
         Student {
             name: "Toad".to_owned(),
             locker: Some(002),
-        }
+        },
     ];
 
     for student in students {
         match student.locker {
             Some(num) => println!("{:?} has locker number {:?}", student, num),
-            None => println!("{:?} has no locker assigned.", student.name)
+            None => println!("{:?} has no locker assigned.", student.name),
         }
     }
-
+    // NOTE: Cannot borrow 'students' here since it was moved and dropped
+    // inside the for loop.
+    // println!("students.len(): {:?}", students.len())
 }
-
