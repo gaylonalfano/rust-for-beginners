@@ -9,14 +9,14 @@
 // - assert_eq! has three args: value, value_expected, message
 // - Access functions outside your test module by: use crate::*;
 // - Run the test using: cargo test
-
+// - Inline modules 'mod X' are essentially treated like a
+//   separate file, so need to import with 'use'
 
 fn all_caps(word: &str) -> String {
     word.to_uppercase()
 }
 
 fn main() {}
-
 
 // NOTE To test, we can create a new module and configure this module
 // to tell compiler it's only for testing
@@ -33,8 +33,7 @@ mod test {
     #[test]
     fn check_all_caps() {
         let result = all_caps("hello");
-        let expected = String::from("hello");
+        let expected = String::from("HELLO");
         assert_eq!(result, expected, "String should be all uppercase");
     }
-
 }
