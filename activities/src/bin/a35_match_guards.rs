@@ -55,13 +55,28 @@ enum Tile {
 }
 
 fn print_tile(tile: Tile) {
+    // NOTE: Import the Tile variants for cleaner syntax!
+    use Tile::*;
+
     match tile {
-        t @ Tile::Dirt | t @ Tile::Sand | t @ Tile::Grass => println!("Ground tile: {:?}", t),
-        Tile::Brick(bs @ BrickStyle::Red | bs @ BrickStyle::Gray) => {
+        t @ Dirt | t @ Sand | t @ Grass => println!("Ground tile: {:?}", t),
+        Brick(bs @ BrickStyle::Red | bs @ BrickStyle::Gray) => {
             println!("Brick color is: {:?}", bs)
         }
-        Tile::Brick(bs) => println!("{:?} brick", bs),
-        _ => println!("Todo..."),
+        // NOTE: Alternate debug print syntax {var_name:?}
+        Brick(bs) => println!("{bs:?} brick"),
+        Treasure(TreasureChest {
+            content: TreasureItem::Gold,
+            amount,
+        }) if amount >= 100 => println!("Lots of gold!"),
+        Treasure(TreasureChest { .. }) => println!("Treasure: Anything but Gold && >=100"),
+        // Q: How to add conditions to inner values on Pressure(usize) struct?
+        // Water(Pressure(p @ 0..=9)) => println!("Water pressure too LOW: {p:?}"),
+        // Water(Pressure(p)) => println!("Water pressure is HIGH: {p:?}"),
+        // U: Alternate syntax accessing tuple structure value
+        Water(p) if p.0 < 10 => println!("Water pressue is LOW: {p:?}"),
+        Water(p) if p.0 >= 10 => println!("Water pressue is HIGH: {p:?}"),
+        _ => (),
     }
 }
 
@@ -69,7 +84,24 @@ fn main() {
     let red_brick = BrickStyle::Red;
     let dungeon_brick = BrickStyle::Dungeon;
     let dirt_tile = Tile::Dirt;
-    print_tile(dirt_tile);
+    let water_tile = Tile::Water(Pressure(12));
+    let gold_150_treasure_chest = TreasureChest {
+        content: TreasureItem::Gold,
+        amount: 150,
+    };
+
+    let gold_50_treasure_chest = TreasureChest {
+        content: TreasureItem::Gold,
+        amount: 50,
+    };
+
+    let pressure_high_water = Pressure(15);
+    let pressure_low_water = Pressure(5);
+
+    print_tile(Tile::Water(pressure_low_water));
+    print_tile(Tile::Treasure(gold_150_treasure_chest));
+    print_tile(Tile::Brick(dungeon_brick));
+    print_tile(Tile::Sand);
 }
 
 // === Example 1
