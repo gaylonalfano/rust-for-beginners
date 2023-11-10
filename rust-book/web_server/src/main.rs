@@ -97,5 +97,5 @@ fn handle_connection(mut stream: TcpStream) {
 
 fn insert_template_variable(var: &str) {
     let formatted_str = format!("{{ {} }}", var);
-    println!("formatted_str: {:?}", formatted_str);
+    // println!("formatted_str: {:?}", formatted_str);
 }
