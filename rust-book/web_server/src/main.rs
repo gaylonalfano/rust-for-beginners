@@ -12,7 +12,7 @@ fn main() {
     let listener = TcpListener::bind("127.0.0.1:7878").unwrap();
     let pool = ThreadPool::new(4);
 
-    for stream in listener.incoming() {
+    for stream in listener.incoming().take(2) {
         let stream = stream.unwrap();
 
         // // -- Thread for each request approach:
@@ -23,6 +23,15 @@ fn main() {
         // -- Thread pool approach:
         pool.execute(|| handle_connection(stream));
     }
+
+    // NOTE: U: After impl Drop for ThreadPool, when our server
+    // shuts down after serving our requests (i.e. take(2)),
+    // the ThreadPool will go out of scope here at the end of main,
+    // and the drop() implementation that closes the channel by
+    // moving the channel sender out of ThreadPool, which results in
+    // our Worker threads to return errors. This is all part of
+    // the graceful shutdown.
+    println!("Shutting down.");
 }
 
 fn handle_connection(mut stream: TcpStream) {

@@ -5,7 +5,11 @@ use std::{
 
 pub struct ThreadPool {
     workers: Vec<Worker>,
-    sender: mpsc::Sender<Job>,
+    // NOTE: U: Need to do the same Option take() from Some(val)
+    // to move the sender out of ThreadPool. This will allow us
+    // to explicitly drop the sender before waiting for the threads
+    // to finish.
+    sender: Option<mpsc::Sender<Job>>,
 }
 
 // Job is a trait object (Box) that holds the type of closure
@@ -45,7 +49,10 @@ impl ThreadPool {
             workers.push(Worker::new(id, Arc::clone(&receiver)));
         }
 
-        Self { workers, sender }
+        Self {
+            workers,
+            sender: Some(sender),
+        }
     }
 
     // TODO: Another approach vs. new(). See Config::build from
@@ -65,14 +72,53 @@ impl ThreadPool {
 
         // Use unwrap() in case sending the job down the sending end
         // of the channel fails. It shouldn't but compiler doesn't know.
-        self.sender.send(job).unwrap();
+        // U: Updated to Option so we can drop sender when shutting down
+        self.sender.as_ref().unwrap().send(job).unwrap();
+    }
+}
+
+impl Drop for ThreadPool {
+    fn drop(&mut self) {
+        // U: Move sender out of ThreadPool by taking before
+        // we move the threads out of workers to gracefully shutdown
+        // NOTE: Dropping the sender closes the channel, which indicates
+        // no more messages will be sent. All future sender.recv() calls
+        // that the Worker's loop does will return an error
+        drop(self.sender.take());
+
+        for worker in &mut self.workers {
+            println!("Shutting down worker {}", worker.id);
+
+            // NOTE: U: join() takes ownership (consumes) of its arguments
+            // Therefore, this moves worker.thread into join. Instead, we need
+            // to move the thread out of its Worker instance by using the
+            // Option.take() method, which takes the value from Some(val) and
+            // replaces with None variant. So, we need to change Worker.thread
+            // to be an Option<thread::JoinHandle<()>>.
+            // BAD: worker.thread.join().unwrap();
+            // With Option<JoinHandle<()>>.
+            // NOTE: We use 'if let Some(thread)' to destructure the Some
+            // and get the thread. If a worker's thread is already None,
+            // we know that worker has already had its thread cleaned up.
+            if let Some(thread) = worker.thread.take() {
+                // We've taken the inner thread, so now we can join()
+                // to ensure all threads complete before shutting down gracefully.
+                thread.join().unwrap();
+            }
+        }
     }
 }
 
 // REF: https://doc.rust-lang.org/book/ch20-02-multithreaded.html#a-worker-struct-responsible-for-sending-code-from-the-threadpool-to-a-thread
 struct Worker {
     id: usize,
-    thread: thread::JoinHandle<()>,
+    // NOTE: U: join() takes ownership (consumes) of its arguments
+    // Therefore, this moves worker.thread into join. Instead, we need
+    // to move the thread out of its Worker instance by using the
+    // Option.take() method, which takes the value from Some(val) and
+    // replaces with None variant. So, we need to change Worker.thread
+    // to be an Option<thread::JoinHandle<()>>.
+    thread: Option<thread::JoinHandle<()>>,
 }
 
 impl Worker {
@@ -84,13 +130,26 @@ impl Worker {
         // method that returns Result instead of panicking.
         // NOTE: We'll use the receiver in the thread that the workers spawn
         let thread = thread::spawn(move || loop {
-            let job = receiver.lock().unwrap().recv().unwrap();
+            // U: Gracefully exitthe loop when the ThreadPool drop() implementation
+            // calls join() on Worker threads.
+            let message = receiver.lock().unwrap().recv();
 
-            println!("Worker {id} got a job; executing.");
+            match message {
+                Ok(job) => {
+                    println!("Worker {id} got a job; executing.");
 
-            job();
+                    job();
+                }
+                Err(_) => {
+                    println!("Worker {id} disconnected; shutting down.");
+                    break;
+                }
+            }
         });
 
-        Self { id, thread }
+        Self {
+            id,
+            thread: Some(thread),
+        }
     }
 }
